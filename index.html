@@ -39,40 +39,56 @@
   .home-links a:active { filter: brightness(1.2); }
 
   /* ---------- โหมด Control ---------- */
-  #controlView { display: none; min-height: 100vh; padding: 16px; flex-direction: column; gap: 16px; max-width: 720px; margin: 0 auto; }
+  #controlView { display: none; min-height: 100vh; padding: 14px; flex-direction: column; gap: 14px; max-width: 760px; margin: 0 auto; }
   .status { text-align: center; font-size: 13px; color: var(--muted); min-height: 18px; }
   .status.error { color: #f87171; }
 
+  .tab-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--card-bg); padding: 6px; border-radius: 14px; position: sticky; top: 0; z-index: 20; }
+  .tab-btn { background: transparent; color: var(--muted); padding: 12px 0; font-size: 14px; border-radius: 10px; }
+  .tab-btn.active { background: #3b82f6; color: #fff; }
+
+  .tab-panel { display: none; flex-direction: column; gap: 14px; }
+  .tab-panel.active { display: flex; }
+
+  .teams-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  @media (min-width: 620px) { .teams-grid { grid-template-columns: 1fr 1fr; align-items: start; } }
+
   .team-card {
-    background: var(--card-bg); border-radius: 20px; padding: 16px;
-    display: flex; flex-direction: column; gap: 14px; border-top: 6px solid var(--c);
+    background: var(--card-bg); border-radius: 18px; padding: 14px;
+    display: flex; flex-direction: column; gap: 12px; border-top: 6px solid var(--c);
   }
   .team-card.a { --c: var(--team-a-color, #3b82f6); }
   .team-card.b { --c: var(--team-b-color, #f59e0b); }
   .name-row { display: flex; gap: 8px; align-items: center; }
   .name-input {
     flex: 1; background: #000; border: 1px solid #333; color: var(--text);
-    font-size: 16px; padding: 8px 10px; border-radius: 10px; min-width: 0; font-weight: 700;
+    font-size: 15px; padding: 8px 10px; border-radius: 10px; min-width: 0; font-weight: 700;
   }
-  input[type="color"] { width: 40px; height: 40px; border: none; border-radius: 10px; background: none; padding: 0; cursor: pointer; flex-shrink: 0; }
+  input[type="color"] { width: 38px; height: 38px; border: none; border-radius: 10px; background: none; padding: 0; cursor: pointer; flex-shrink: 0; }
 
-  .vote-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .vote-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .vote-block {
-    background: #0d0f13; border-radius: 16px; padding: 12px; display: flex;
-    flex-direction: column; align-items: center; gap: 8px; border: 1px solid #26292f;
+    background: #0d0f13; border-radius: 14px; padding: 10px; display: flex;
+    flex-direction: column; align-items: center; gap: 6px; border: 1px solid #26292f;
   }
   .vote-block.yes { border-color: rgba(34,197,94,0.35); }
   .vote-block.no { border-color: rgba(239,68,68,0.35); }
-  .vote-label { font-size: 13px; font-weight: 700; letter-spacing: 0.03em; }
+  .vote-label { font-size: 12px; font-weight: 700; letter-spacing: 0.03em; }
   .vote-block.yes .vote-label { color: var(--yes); }
   .vote-block.no .vote-label { color: var(--no); }
-  .vote-count { font-size: 44px; font-weight: 900; font-variant-numeric: tabular-nums; line-height: 1; }
-  .vote-btns { display: flex; gap: 6px; width: 100%; }
+  .vote-count-input {
+    width: 100%; text-align: center; font-size: 38px; font-weight: 900; font-variant-numeric: tabular-nums;
+    line-height: 1; background: transparent; border: none; color: var(--text); font-family: inherit;
+    border-radius: 8px; padding: 2px 0;
+  }
+  .vote-count-input:focus { outline: 2px solid rgba(255,255,255,0.25); background: #000; }
+  .vote-count-input::-webkit-outer-spin-button, .vote-count-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .vote-btns { display: flex; gap: 5px; width: 100%; }
   button { border: none; border-radius: 12px; font-weight: 700; cursor: pointer; touch-action: manipulation; font-family: inherit; }
-  .vote-btns button { flex: 1; padding: 12px 0; font-size: 15px; color: #fff; }
+  .vote-btns button { flex: 1; padding: 10px 0; font-size: 13px; color: #fff; }
   .vote-block.yes .btn-plus { background: var(--yes); }
   .vote-block.no .btn-plus { background: var(--no); }
-  .btn-minus5, .btn-plus5 { background: #26292f !important; color: var(--text) !important; font-size: 13px !important; flex: 0 0 auto !important; padding: 12px 10px !important; }
+  .btn-minus5, .btn-plus5 { background: #26292f !important; color: var(--text) !important; font-size: 12px !important; flex: 0 0 auto !important; padding: 10px 8px !important; }
   .btn-minus { background: #26292f !important; color: var(--text) !important; }
   button:active { filter: brightness(0.85); transform: scale(0.97); }
 
@@ -85,12 +101,65 @@
   .progress-track { height: 8px; border-radius: 999px; background: #0d0f13; overflow: hidden; border: 1px solid #26292f; }
   .progress-fill { height: 100%; background: var(--c); transition: width 0.25s ease; }
 
-  .global-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
-  .btn-reset { background: #26292f; color: #f87171; padding: 12px 20px; font-size: 14px; }
-  .btn-home { background: #26292f; color: var(--muted); padding: 12px 20px; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; }
+  .global-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .btn-reset { background: #26292f; color: #f87171; padding: 12px 18px; font-size: 13px; }
+  .btn-home { background: #26292f; color: var(--muted); padding: 12px 18px; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; }
 
   .grand-total { text-align: center; font-size: 13px; color: var(--muted); }
   .grand-total b { color: var(--text); font-size: 15px; }
+
+  .section-title { font-size: 13px; font-weight: 700; color: var(--muted); margin: 0 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .card { background: var(--card-bg); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+  .timer-set-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .timer-set-row input {
+    width: 64px; background: #000; border: 1px solid #333; color: var(--text);
+    font-size: 15px; padding: 8px; border-radius: 10px; text-align: center;
+  }
+  .timer-preset-btn { background: #26292f; color: var(--text); padding: 8px 12px; font-size: 13px; }
+  .timer-display-mini { font-size: 38px; font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; }
+  .timer-controls { display: flex; gap: 8px; }
+  .timer-controls button { flex: 1; padding: 12px 0; font-size: 14px; }
+  .btn-start { background: #22c55e; color: #05060a; }
+  .btn-pause { background: #f59e0b; color: #05060a; }
+  .btn-reset-timer { background: #26292f; color: var(--text); }
+
+  .q-add-row { display: flex; flex-direction: column; gap: 8px; }
+  .q-add-row input {
+    background: #000; border: 1px solid #333; color: var(--text);
+    font-size: 15px; padding: 10px; border-radius: 10px;
+  }
+  .btn-add-q { background: #3b82f6; color: #fff; padding: 10px; font-size: 14px; }
+  .q-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
+  .q-item {
+    background: #0d0f13; border-radius: 12px; padding: 10px 12px;
+    display: flex; flex-direction: column; gap: 4px; border: 1px solid #26292f;
+  }
+  .q-item.active { border-color: #3b82f6; }
+  .q-item-text { font-size: 14px; }
+  .q-item-answer { font-size: 12px; color: var(--muted); }
+  .q-item-actions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .q-item-actions button { font-size: 12px; padding: 8px 10px; background: #26292f; color: var(--text); }
+  .q-item-actions .btn-del { color: #f87171; }
+  .q-empty { color: var(--muted); font-size: 13px; text-align: center; padding: 12px 0; }
+
+  .active-q-panel {
+    background: #0d0f13; border: 1px solid #3b82f6; border-radius: 14px; padding: 14px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .active-q-panel .q-text { font-size: 16px; font-weight: 700; }
+  .active-q-panel .a-text { font-size: 14px; color: #4ade80; }
+  .choice-inputs { display: flex; flex-direction: column; gap: 6px; }
+  .choice-inputs .choice-row { display: flex; align-items: center; gap: 8px; }
+  .choice-inputs .choice-letter { width: 22px; font-weight: 700; color: var(--muted); font-size: 14px; flex-shrink: 0; }
+  .choice-inputs input[type="text"] { flex: 1; background: #000; border: 1px solid #333; color: var(--text); font-size: 14px; padding: 8px 10px; border-radius: 10px; }
+  .choice-inputs input[type="radio"] { width: 18px; height: 18px; flex-shrink: 0; }
+  .active-choices { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+  .active-choice-item { background: #16181e; border: 1px solid #26292f; border-radius: 10px; padding: 8px 10px; font-size: 13px; }
+  .active-choice-item.correct-reveal { border-color: #4ade80; color: #4ade80; }
+  .active-q-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .active-q-actions button { font-size: 13px; padding: 10px 14px; }
+  .btn-reveal { background: #f59e0b; color: #05060a; }
+  .btn-close-q { background: #26292f; color: var(--text); }
 
   /* ---------- โหมด Display ---------- */
   #displayView { display: none; height: 100vh; width: 100vw; overflow: hidden; position: relative; }
@@ -126,12 +195,53 @@
   }
 
   .grand-total-ribbon {
-    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-    background: #05060a; border: 1px solid rgba(255,255,255,0.15); border-top: none;
-    border-radius: 0 0 18px 18px; padding: 0.8vh 2.5vw; z-index: 5;
-    font-size: 1.5vw; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums;
+    position: absolute; top: 0; left: 0;
+    background: #05060a; border: 1px solid rgba(255,255,255,0.15); border-left: none; border-top: none;
+    border-radius: 0 0 18px 0; padding: 0.8vh 1.6vw; z-index: 5;
+    font-size: 1.3vw; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums;
   }
   .grand-total-ribbon b { color: var(--text); }
+
+  .timer-ribbon {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    background: #05060a; border: 1px solid rgba(255,255,255,0.15); border-top: none;
+    border-radius: 0 0 20px 20px; padding: 1vh 3vw; z-index: 5;
+    font-size: 6vw; font-weight: 900; font-variant-numeric: tabular-nums;
+    display: none;
+  }
+  .timer-ribbon.show { display: block; }
+  .timer-ribbon.low { color: #f87171; }
+
+  .question-overlay {
+    position: absolute; inset: 0; z-index: 6; display: none;
+    align-items: center; justify-content: center; padding: 5vw;
+    background: rgba(5,6,10,0.92); backdrop-filter: blur(4px);
+  }
+  .question-overlay.show { display: flex; }
+  .question-box {
+    background: #12141a; border: 2px solid #3b82f6; border-radius: 24px;
+    padding: 5vw 6vw; max-width: 80vw; text-align: center;
+    display: flex; flex-direction: column; gap: 3vh;
+  }
+  .question-label { font-size: 1.8vw; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+  .question-text { font-size: 4vw; font-weight: 800; line-height: 1.3; }
+  .answer-text { font-size: 3vw; font-weight: 700; color: #4ade80; display: none; }
+  .answer-text.show { display: block; }
+  .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5vw; margin-top: 1vh; }
+  .choice-box {
+    background: #0d0f13; border: 2px solid #333; border-radius: 14px;
+    padding: 1.5vw 1.8vw; display: flex; align-items: center; gap: 1vw;
+    text-align: left; transition: all 0.3s ease;
+  }
+  .choice-box .choice-letter {
+    font-size: 1.8vw; font-weight: 900; color: var(--muted);
+    background: #1a1d24; border-radius: 8px; width: 2.8vw; height: 2.8vw;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .choice-box .choice-text { font-size: 1.8vw; font-weight: 600; }
+  .choice-box.correct-reveal { border-color: #4ade80; background: rgba(74, 222, 128, 0.12); }
+  .choice-box.correct-reveal .choice-letter { background: #4ade80; color: #05060a; }
+  .choice-box.correct-reveal .choice-text { color: #4ade80; }
 
   .connecting-overlay {
     position: fixed; inset: 0; background: rgba(5,6,10,0.95); display: flex;
@@ -146,81 +256,160 @@
   <h1>🗳️ โหวต ใช่ / ไม่ — 2 ทีม</h1>
   <p>เลือกโหมดที่ต้องการเปิดในอุปกรณ์นี้</p>
   <div class="home-links">
-    <a href="?mode=display">📺 จอโชว์ผลโหวต</a>
-    <a href="?mode=control">🎮 จอกดนับโหวต</a>
+    <a href="?mode=display">📺 จอโชว์ผล</a>
+    <a href="?mode=control">🎮 จอควบคุม</a>
   </div>
 </div>
 
 <div id="controlView">
   <div class="status" id="statusText"></div>
 
-  <div class="team-card a" id="cardA">
-    <div class="name-row">
-      <input type="color" id="colorA" value="#3b82f6" />
-      <input type="text" id="nameA" class="name-input" value="ทีม A" maxlength="20" />
-    </div>
-    <div class="vote-row">
-      <div class="vote-block yes">
-        <div class="vote-label">✅ ใช่</div>
-        <div class="vote-count" id="yesA">0</div>
-        <div class="vote-btns">
-          <button class="btn-minus" data-team="A" data-side="yes" data-delta="-1">−1</button>
-          <button class="btn-plus" data-team="A" data-side="yes" data-delta="1">+1</button>
-          <button class="btn-plus5" data-team="A" data-side="yes" data-delta="5">+5</button>
-        </div>
-      </div>
-      <div class="vote-block no">
-        <div class="vote-label">❌ ไม่</div>
-        <div class="vote-count" id="noA">0</div>
-        <div class="vote-btns">
-          <button class="btn-minus" data-team="A" data-side="no" data-delta="-1">−1</button>
-          <button class="btn-plus" data-team="A" data-side="no" data-delta="1">+1</button>
-          <button class="btn-plus5" data-team="A" data-side="no" data-delta="5">+5</button>
-        </div>
-      </div>
-    </div>
-    <div class="team-summary">
-      <span>รวม: <b id="totalA">0</b> / <input type="number" id="targetA" class="target-input" min="0" value="350" /> คน</span>
-    </div>
-    <div class="progress-track"><div class="progress-fill" id="progressA" style="width:0%"></div></div>
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tabVoteBtn" data-tab="voteSection">🗳️ โหวต</button>
+    <button class="tab-btn" id="tabQuizBtn" data-tab="quizSection">❓ คำถาม/เวลา</button>
   </div>
 
-  <div class="team-card b" id="cardB">
-    <div class="name-row">
-      <input type="color" id="colorB" value="#f59e0b" />
-      <input type="text" id="nameB" class="name-input" value="ทีม B" maxlength="20" />
-    </div>
-    <div class="vote-row">
-      <div class="vote-block yes">
-        <div class="vote-label">✅ ใช่</div>
-        <div class="vote-count" id="yesB">0</div>
-        <div class="vote-btns">
-          <button class="btn-minus" data-team="B" data-side="yes" data-delta="-1">−1</button>
-          <button class="btn-plus" data-team="B" data-side="yes" data-delta="1">+1</button>
-          <button class="btn-plus5" data-team="B" data-side="yes" data-delta="5">+5</button>
+  <div class="tab-panel active" id="voteSection">
+    <div class="teams-grid">
+      <div class="team-card a" id="cardA">
+        <div class="name-row">
+          <input type="color" id="colorA" value="#3b82f6" />
+          <input type="text" id="nameA" class="name-input" value="ทีม A" maxlength="20" />
         </div>
-      </div>
-      <div class="vote-block no">
-        <div class="vote-label">❌ ไม่</div>
-        <div class="vote-count" id="noB">0</div>
-        <div class="vote-btns">
-          <button class="btn-minus" data-team="B" data-side="no" data-delta="-1">−1</button>
-          <button class="btn-plus" data-team="B" data-side="no" data-delta="1">+1</button>
-          <button class="btn-plus5" data-team="B" data-side="no" data-delta="5">+5</button>
+        <div class="vote-row">
+          <div class="vote-block yes">
+            <div class="vote-label">✅ ใช่</div>
+            <input type="number" class="vote-count-input" id="yesA" data-team="A" data-side="yes" value="0" inputmode="numeric" />
+            <div class="vote-btns">
+              <button class="btn-minus" data-team="A" data-side="yes" data-delta="-1">−1</button>
+              <button class="btn-plus" data-team="A" data-side="yes" data-delta="1">+1</button>
+              <button class="btn-plus5" data-team="A" data-side="yes" data-delta="5">+5</button>
+            </div>
+          </div>
+          <div class="vote-block no">
+            <div class="vote-label">❌ ไม่</div>
+            <input type="number" class="vote-count-input" id="noA" data-team="A" data-side="no" value="0" inputmode="numeric" />
+            <div class="vote-btns">
+              <button class="btn-minus" data-team="A" data-side="no" data-delta="-1">−1</button>
+              <button class="btn-plus" data-team="A" data-side="no" data-delta="1">+1</button>
+              <button class="btn-plus5" data-team="A" data-side="no" data-delta="5">+5</button>
+            </div>
+          </div>
         </div>
+        <div class="team-summary">
+          <span>รวม: <b id="totalA">0</b> / <input type="number" id="targetA" class="target-input" min="0" value="350" /> คน</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="progressA" style="width:0%"></div></div>
+      </div>
+
+      <div class="team-card b" id="cardB">
+        <div class="name-row">
+          <input type="color" id="colorB" value="#f59e0b" />
+          <input type="text" id="nameB" class="name-input" value="ทีม B" maxlength="20" />
+        </div>
+        <div class="vote-row">
+          <div class="vote-block yes">
+            <div class="vote-label">✅ ใช่</div>
+            <input type="number" class="vote-count-input" id="yesB" data-team="B" data-side="yes" value="0" inputmode="numeric" />
+            <div class="vote-btns">
+              <button class="btn-minus" data-team="B" data-side="yes" data-delta="-1">−1</button>
+              <button class="btn-plus" data-team="B" data-side="yes" data-delta="1">+1</button>
+              <button class="btn-plus5" data-team="B" data-side="yes" data-delta="5">+5</button>
+            </div>
+          </div>
+          <div class="vote-block no">
+            <div class="vote-label">❌ ไม่</div>
+            <input type="number" class="vote-count-input" id="noB" data-team="B" data-side="no" value="0" inputmode="numeric" />
+            <div class="vote-btns">
+              <button class="btn-minus" data-team="B" data-side="no" data-delta="-1">−1</button>
+              <button class="btn-plus" data-team="B" data-side="no" data-delta="1">+1</button>
+              <button class="btn-plus5" data-team="B" data-side="no" data-delta="5">+5</button>
+            </div>
+          </div>
+        </div>
+        <div class="team-summary">
+          <span>รวม: <b id="totalB">0</b> / <input type="number" id="targetB" class="target-input" min="0" value="350" /> คน</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="progressB" style="width:0%"></div></div>
       </div>
     </div>
-    <div class="team-summary">
-      <span>รวม: <b id="totalB">0</b> / <input type="number" id="targetB" class="target-input" min="0" value="350" /> คน</span>
+
+    <div class="grand-total">รวมทั้งหมดที่นับแล้ว: <b id="grandTotal">0</b> / <span id="grandTarget">700</span> คน</div>
+
+    <div class="global-actions">
+      <a class="btn-home" href="?">← กลับหน้าแรก</a>
+      <button class="btn-reset" id="resetBtn">รีเซ็ตยอดโหวต</button>
     </div>
-    <div class="progress-track"><div class="progress-fill" id="progressB" style="width:0%"></div></div>
   </div>
 
-  <div class="grand-total">รวมทั้งหมดที่นับแล้ว: <b id="grandTotal">0</b> / <span id="grandTarget">700</span> คน</div>
+  <div class="tab-panel" id="quizSection">
+    <div class="section-title">⏱ ตั้งเวลา</div>
+    <div class="card">
+      <div class="timer-set-row">
+        <span style="font-size:13px;color:var(--muted)">ตั้ง:</span>
+        <input type="number" id="timerMin" min="0" max="180" value="1" /> นาที
+        <input type="number" id="timerSec" min="0" max="59" value="0" /> วินาที
+        <button class="timer-preset-btn" id="applyTimerSet">ใช้ค่านี้</button>
+      </div>
+      <div class="timer-set-row">
+        <button class="timer-preset-btn" data-preset="30">30 วิ</button>
+        <button class="timer-preset-btn" data-preset="60">1 นาที</button>
+        <button class="timer-preset-btn" data-preset="180">3 นาที</button>
+        <button class="timer-preset-btn" data-preset="300">5 นาที</button>
+      </div>
+      <div class="timer-display-mini" id="timerMiniDisplay">01:00</div>
+      <div class="timer-controls">
+        <button class="btn-start" id="timerStart">▶ เริ่ม</button>
+        <button class="btn-pause" id="timerPause">⏸ พัก</button>
+        <button class="btn-reset-timer" id="timerReset">↺ รีเซ็ต</button>
+      </div>
+    </div>
 
-  <div class="global-actions">
-    <a class="btn-home" href="?">← กลับหน้าแรก</a>
-    <button class="btn-reset" id="resetBtn">รีเซ็ตทั้งหมด</button>
+    <div class="section-title">❓ โจทย์คำถาม</div>
+    <div class="card">
+      <div id="activeQPanel" class="active-q-panel hidden">
+        <div class="q-text" id="activeQText"></div>
+        <div class="active-choices" id="activeChoices"></div>
+        <div class="a-text hidden" id="activeAText"></div>
+        <div class="active-q-actions">
+          <button class="btn-reveal" id="revealBtn">เฉลย</button>
+          <button class="btn-close-q" id="closeQBtn">ปิดคำถามนี้</button>
+        </div>
+      </div>
+
+      <div class="q-add-row">
+        <input type="text" id="newQ" placeholder="พิมพ์คำถาม..." maxlength="200" />
+        <div class="choice-inputs">
+          <div class="choice-row">
+            <input type="radio" name="correctChoice" value="0" checked />
+            <span class="choice-letter">ก</span>
+            <input type="text" id="newC0" placeholder="ตัวเลือก ก (เว้นว่างได้ถ้าไม่ใช้แบบเลือกตอบ)" maxlength="100" />
+          </div>
+          <div class="choice-row">
+            <input type="radio" name="correctChoice" value="1" />
+            <span class="choice-letter">ข</span>
+            <input type="text" id="newC1" placeholder="ตัวเลือก ข" maxlength="100" />
+          </div>
+          <div class="choice-row">
+            <input type="radio" name="correctChoice" value="2" />
+            <span class="choice-letter">ค</span>
+            <input type="text" id="newC2" placeholder="ตัวเลือก ค" maxlength="100" />
+          </div>
+          <div class="choice-row">
+            <input type="radio" name="correctChoice" value="3" />
+            <span class="choice-letter">ง</span>
+            <input type="text" id="newC3" placeholder="ตัวเลือก ง" maxlength="100" />
+          </div>
+          <span style="font-size:12px;color:var(--muted)">ติ๊กวงกลมหน้าข้อที่ถูก (ใช้เมื่อกรอกตัวเลือกไว้)</span>
+        </div>
+        <input type="text" id="newA" placeholder="พิมพ์เฉลย / คำอธิบายเพิ่มเติม..." maxlength="200" />
+        <button class="btn-add-q" id="addQBtn">+ เพิ่มคำถาม</button>
+      </div>
+
+      <div class="q-list" id="qList">
+        <div class="q-empty">ยังไม่มีคำถาม เพิ่มด้านบนได้เลย</div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -259,7 +448,18 @@
     </div>
     <div class="vs">VS</div>
   </div>
-  <div class="grand-total-ribbon">นับแล้วทั้งหมด <b id="dispGrandTotal">0</b> / <span id="dispGrandTarget">700</span> คน</div>
+  <div class="grand-total-ribbon">นับแล้ว <b id="dispGrandTotal">0</b> / <span id="dispGrandTarget">700</span> คน</div>
+
+  <div class="timer-ribbon" id="timerRibbon">01:00</div>
+
+  <div class="question-overlay" id="questionOverlay">
+    <div class="question-box">
+      <div class="question-label">คำถาม</div>
+      <div class="question-text" id="dispQText"></div>
+      <div class="choices-grid hidden" id="dispChoicesGrid"></div>
+      <div class="answer-text" id="dispAText"></div>
+    </div>
+  </div>
 </div>
 
 <div id="connectingOverlay" class="connecting-overlay hidden">กำลังเชื่อมต่อ...</div>
@@ -280,14 +480,21 @@
   };
   // ใช้ document เดียวกันเป๊ะกับแอปสกอร์บอร์ดเดิม (scoreboard/current)
   // เพราะ Firestore Rules อนุญาตเฉพาะ document นี้เท่านั้น
-  // ฟิลด์ของสองแอปคนละชื่อกัน (scoreA/scoreB ของเดิม vs yesA/noA/... ของอันนี้)
-  // จึงอยู่ร่วมกันใน document เดียวได้โดยไม่ทับข้อมูลกัน
+  // ฟิลด์ทั้งหมดของแอปนี้ขึ้นต้นด้วย vote/yes/no/target เพื่อไม่ทับฟิลด์เดิมของสกอร์บอร์ด
   const VOTE_DOC_PATH = { collection: "scoreboard", doc: "current" };
   const DEFAULT_STATE = {
     voteNameA: "ทีม A", voteNameB: "ทีม B",
     voteColorA: "#3b82f6", voteColorB: "#f59e0b",
     yesA: 0, noA: 0, yesB: 0, noB: 0,
     targetA: 350, targetB: 350,
+    voteTimerDuration: 60,
+    voteTimerRemaining: 60,
+    voteTimerRunning: false,
+    voteTimerEndAt: null,
+    voteQuestions: [],
+    voteCurrentQIndex: -1,
+    voteQuestionVisible: false,
+    voteShowAnswer: false,
   };
 
   const params = new URLSearchParams(window.location.search);
@@ -316,6 +523,19 @@
     return doc(db, VOTE_DOC_PATH.collection, VOTE_DOC_PATH.doc);
   }
 
+  function fmtTime(totalSeconds) {
+    const s = Math.max(0, Math.round(totalSeconds));
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
   let audioCtx = null;
   function ensureAudio() {
     if (!audioCtx) {
@@ -341,6 +561,8 @@
     if (positive) { beep(700, 0.07, "sine", 0, 0.25); beep(1000, 0.1, "sine", 0.06, 0.25); }
     else { beep(300, 0.1, "sine", 0, 0.2); }
   }
+  function playBuzzerSound() { ensureAudio(); beep(180, 0.5, "sawtooth", 0, 0.3); beep(160, 0.5, "sawtooth", 0.05, 0.25); }
+  function playRevealSound() { ensureAudio(); beep(500, 0.1, "triangle", 0, 0.2); beep(750, 0.15, "triangle", 0.1, 0.2); }
 
   async function runControlMode() {
     const voteRef = initFirebase();
@@ -355,12 +577,31 @@
       targetA: document.getElementById("targetA"), targetB: document.getElementById("targetB"),
       progressA: document.getElementById("progressA"), progressB: document.getElementById("progressB"),
       grandTotal: document.getElementById("grandTotal"), grandTarget: document.getElementById("grandTarget"),
+      timerMin: document.getElementById("timerMin"), timerSec: document.getElementById("timerSec"),
+      timerMiniDisplay: document.getElementById("timerMiniDisplay"),
+      qList: document.getElementById("qList"),
+      activeQPanel: document.getElementById("activeQPanel"),
+      activeQText: document.getElementById("activeQText"),
+      activeAText: document.getElementById("activeAText"),
     };
+
+    // ---- Tabs ----
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        document.getElementById(btn.dataset.tab).classList.add("active");
+      });
+    });
 
     let isTypingName = false;
     let isTypingTarget = false;
     let saveNameTimeout = null;
     let saveTargetTimeout = null;
+    let latestData = null;
+    let tickInterval = null;
+    const editingCounts = new Set();
 
     document.body.addEventListener("click", ensureAudio, { once: true });
 
@@ -378,15 +619,17 @@
     onSnapshot(voteRef, (snap) => {
       if (!snap.exists()) return;
       const data = snap.data();
+      latestData = data;
 
       const yesA = data.yesA ?? 0, noA = data.noA ?? 0;
       const yesB = data.yesB ?? 0, noB = data.noB ?? 0;
       const targetA = data.targetA ?? 350, targetB = data.targetB ?? 350;
 
-      els.yesA.textContent = yesA;
-      els.noA.textContent = noA;
-      els.yesB.textContent = yesB;
-      els.noB.textContent = noB;
+      if (!editingCounts.has(els.yesA)) els.yesA.value = yesA;
+      if (!editingCounts.has(els.noA)) els.noA.value = noA;
+      if (!editingCounts.has(els.yesB)) els.yesB.value = yesB;
+      if (!editingCounts.has(els.noB)) els.noB.value = noB;
+
       els.totalA.textContent = yesA + noA;
       els.totalB.textContent = yesB + noB;
       els.grandTotal.textContent = yesA + noA + yesB + noB;
@@ -408,6 +651,9 @@
         if (document.activeElement !== els.targetB) els.targetB.value = targetB;
       }
 
+      renderTimer();
+      renderQuestions(data);
+
       overlay.classList.add("hidden");
       statusText.textContent = "";
       statusText.classList.remove("error");
@@ -421,6 +667,7 @@
       return (side === "yes" ? "yes" : "no") + team;
     }
 
+    // +1 / -1 / +5 buttons
     document.querySelectorAll("[data-team][data-side][data-delta]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const team = btn.dataset.team;
@@ -434,6 +681,21 @@
           console.error(err);
         });
       });
+    });
+
+    // แก้ไขตัวเลขโหวตได้โดยตรง
+    [els.yesA, els.noA, els.yesB, els.noB].forEach((input) => {
+      input.addEventListener("focus", () => editingCounts.add(input));
+      function commit() {
+        editingCounts.delete(input);
+        const field = fieldFor(input.dataset.team, input.dataset.side);
+        let val = parseInt(input.value, 10);
+        if (isNaN(val) || val < 0) val = 0;
+        input.value = val;
+        updateDoc(voteRef, { [field]: val }).catch(console.error);
+      }
+      input.addEventListener("blur", commit);
+      input.addEventListener("keydown", (e) => { if (e.key === "Enter") { input.blur(); } });
     });
 
     document.getElementById("resetBtn").addEventListener("click", () => {
@@ -472,6 +734,171 @@
       input.addEventListener("blur", () => { isTypingTarget = false; });
       input.addEventListener("input", debounceSaveTargets);
     });
+
+    // ---- Timer ----
+    function renderTimer() {
+      if (!latestData) return;
+      let remaining;
+      if (latestData.voteTimerRunning && latestData.voteTimerEndAt) {
+        remaining = (latestData.voteTimerEndAt - Date.now()) / 1000;
+      } else {
+        remaining = latestData.voteTimerRemaining ?? latestData.voteTimerDuration ?? 60;
+      }
+      els.timerMiniDisplay.textContent = fmtTime(remaining);
+    }
+    if (!tickInterval) tickInterval = setInterval(renderTimer, 250);
+
+    document.getElementById("applyTimerSet").addEventListener("click", () => {
+      const mins = parseInt(els.timerMin.value, 10) || 0;
+      const secs = parseInt(els.timerSec.value, 10) || 0;
+      const total = mins * 60 + secs;
+      updateDoc(voteRef, { voteTimerDuration: total, voteTimerRemaining: total, voteTimerRunning: false, voteTimerEndAt: null }).catch(console.error);
+    });
+
+    document.querySelectorAll(".timer-preset-btn[data-preset]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const total = parseInt(btn.dataset.preset, 10);
+        updateDoc(voteRef, { voteTimerDuration: total, voteTimerRemaining: total, voteTimerRunning: false, voteTimerEndAt: null }).catch(console.error);
+      });
+    });
+
+    document.getElementById("timerStart").addEventListener("click", () => {
+      ensureAudio();
+      if (!latestData) return;
+      const remaining = latestData.voteTimerRunning && latestData.voteTimerEndAt
+        ? (latestData.voteTimerEndAt - Date.now()) / 1000
+        : (latestData.voteTimerRemaining ?? latestData.voteTimerDuration ?? 60);
+      if (remaining <= 0) return;
+      const endAt = Date.now() + remaining * 1000;
+      updateDoc(voteRef, { voteTimerRunning: true, voteTimerEndAt: endAt }).catch(console.error);
+    });
+
+    document.getElementById("timerPause").addEventListener("click", () => {
+      if (!latestData) return;
+      const remaining = latestData.voteTimerRunning && latestData.voteTimerEndAt
+        ? Math.max(0, (latestData.voteTimerEndAt - Date.now()) / 1000)
+        : (latestData.voteTimerRemaining ?? latestData.voteTimerDuration ?? 60);
+      updateDoc(voteRef, { voteTimerRunning: false, voteTimerRemaining: remaining, voteTimerEndAt: null }).catch(console.error);
+    });
+
+    document.getElementById("timerReset").addEventListener("click", () => {
+      if (!latestData) return;
+      const total = latestData.voteTimerDuration ?? 60;
+      updateDoc(voteRef, { voteTimerRunning: false, voteTimerRemaining: total, voteTimerEndAt: null }).catch(console.error);
+    });
+
+    // ---- Questions ----
+    function renderQuestions(data) {
+      const questions = data.voteQuestions || [];
+      const idx = data.voteCurrentQIndex ?? -1;
+      const LETTERS = ["ก", "ข", "ค", "ง"];
+
+      if (data.voteQuestionVisible && idx >= 0 && questions[idx]) {
+        const item = questions[idx];
+        els.activeQPanel.classList.remove("hidden");
+        els.activeQText.textContent = item.q;
+
+        const choicesEl = document.getElementById("activeChoices");
+        if (item.choices && item.choices.some((c) => c)) {
+          choicesEl.innerHTML = item.choices.map((c, i) => {
+            if (!c) return "";
+            const isCorrect = data.voteShowAnswer && i === item.correctIndex;
+            return `<div class="active-choice-item${isCorrect ? " correct-reveal" : ""}">${LETTERS[i]}. ${escapeHtml(c)}</div>`;
+          }).join("");
+        } else {
+          choicesEl.innerHTML = "";
+        }
+
+        if (data.voteShowAnswer) {
+          els.activeAText.textContent = "เฉลย: " + item.a;
+          els.activeAText.classList.remove("hidden");
+        } else {
+          els.activeAText.classList.add("hidden");
+        }
+      } else {
+        els.activeQPanel.classList.add("hidden");
+      }
+
+      if (questions.length === 0) {
+        els.qList.innerHTML = '<div class="q-empty">ยังไม่มีคำถาม เพิ่มด้านบนได้เลย</div>';
+        return;
+      }
+
+      els.qList.innerHTML = "";
+      questions.forEach((item, i) => {
+        const div = document.createElement("div");
+        div.className = "q-item" + (i === idx && data.voteQuestionVisible ? " active" : "");
+        const choicesLine = (item.choices && item.choices.some((c) => c))
+          ? item.choices.map((c, ci) => c ? `${LETTERS[ci]}${ci === item.correctIndex ? "✓" : ""}: ${escapeHtml(c)}` : "").filter(Boolean).join(" | ")
+          : "";
+        div.innerHTML = `
+          <div class="q-item-text">${i + 1}. ${escapeHtml(item.q)}</div>
+          ${choicesLine ? `<div class="q-item-answer">${choicesLine}</div>` : ""}
+          <div class="q-item-answer">เฉลย: ${escapeHtml(item.a)}</div>
+          <div class="q-item-actions">
+            <button data-act="show" data-idx="${i}">📺 โชว์ข้อนี้</button>
+            <button data-act="del" data-idx="${i}" class="btn-del">🗑 ลบ</button>
+          </div>
+        `;
+        els.qList.appendChild(div);
+      });
+
+      els.qList.querySelectorAll("button[data-act]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const i = parseInt(btn.dataset.idx, 10);
+          if (btn.dataset.act === "show") {
+            ensureAudio();
+            updateDoc(voteRef, { voteCurrentQIndex: i, voteQuestionVisible: true, voteShowAnswer: false }).catch(console.error);
+          } else if (btn.dataset.act === "del") {
+            if (confirm("ลบคำถามข้อนี้?")) {
+              const newQuestions = questions.slice();
+              newQuestions.splice(i, 1);
+              updateDoc(voteRef, { voteQuestions: newQuestions, voteQuestionVisible: false, voteCurrentQIndex: -1 }).catch(console.error);
+            }
+          }
+        });
+      });
+    }
+
+    document.getElementById("addQBtn").addEventListener("click", () => {
+      const qInput = document.getElementById("newQ");
+      const aInput = document.getElementById("newA");
+      const c0 = document.getElementById("newC0");
+      const c1 = document.getElementById("newC1");
+      const c2 = document.getElementById("newC2");
+      const c3 = document.getElementById("newC3");
+      const q = qInput.value.trim();
+      const a = aInput.value.trim();
+      const rawChoices = [c0.value.trim(), c1.value.trim(), c2.value.trim(), c3.value.trim()];
+      const hasChoices = rawChoices.some((c) => c !== "");
+      if (!q) { alert("กรอกคำถามด้วย"); return; }
+      if (!hasChoices && !a) { alert("กรอกเฉลย หรือกรอกตัวเลือกอย่างน้อย 1 ช่อง"); return; }
+
+      const newItem = { q, a };
+      if (hasChoices) {
+        const checkedRadio = document.querySelector('input[name="correctChoice"]:checked');
+        const correctIndex = checkedRadio ? parseInt(checkedRadio.value, 10) : 0;
+        newItem.choices = rawChoices;
+        newItem.correctIndex = correctIndex;
+        if (!a) newItem.a = rawChoices[correctIndex] || "";
+      }
+
+      const existing = (latestData && latestData.voteQuestions) || [];
+      updateDoc(voteRef, { voteQuestions: [...existing, newItem] }).catch(console.error);
+      qInput.value = "";
+      aInput.value = "";
+      c0.value = ""; c1.value = ""; c2.value = ""; c3.value = "";
+      document.querySelector('input[name="correctChoice"][value="0"]').checked = true;
+    });
+
+    document.getElementById("revealBtn").addEventListener("click", () => {
+      ensureAudio();
+      updateDoc(voteRef, { voteShowAnswer: true }).catch(console.error);
+    });
+
+    document.getElementById("closeQBtn").addEventListener("click", () => {
+      updateDoc(voteRef, { voteQuestionVisible: false }).catch(console.error);
+    });
   }
 
   function runDisplayMode() {
@@ -486,9 +913,22 @@
       splitYesA: document.getElementById("splitYesA"), splitNoA: document.getElementById("splitNoA"),
       splitYesB: document.getElementById("splitYesB"), splitNoB: document.getElementById("splitNoB"),
       grandTotal: document.getElementById("dispGrandTotal"), grandTarget: document.getElementById("dispGrandTarget"),
+      timerRibbon: document.getElementById("timerRibbon"),
+      questionOverlay: document.getElementById("questionOverlay"),
+      dispQText: document.getElementById("dispQText"),
+      dispAText: document.getElementById("dispAText"),
+      dispChoicesGrid: document.getElementById("dispChoicesGrid"),
     };
+    const LETTERS = ["ก", "ข", "ค", "ง"];
 
     let prevYesA = null, prevNoA = null, prevYesB = null, prevNoB = null;
+    let prevShowAnswer = false;
+    let latestData = null;
+    let buzzerPlayedForThisRun = false;
+
+    function tryUnlockAudio() { ensureAudio(); document.removeEventListener("click", tryUnlockAudio); document.removeEventListener("touchstart", tryUnlockAudio); }
+    document.addEventListener("click", tryUnlockAudio);
+    document.addEventListener("touchstart", tryUnlockAudio);
 
     function pulse(el) {
       el.classList.remove("pulse");
@@ -507,6 +947,7 @@
     onSnapshot(voteRef, (snap) => {
       if (!snap.exists()) return;
       const data = snap.data();
+      latestData = data;
 
       const yesA = data.yesA ?? 0, noA = data.noA ?? 0;
       const yesB = data.yesB ?? 0, noB = data.noB ?? 0;
@@ -536,8 +977,67 @@
       if (prevNoB !== null && noB !== prevNoB) pulse(els.noB);
       prevYesA = yesA; prevNoA = noA; prevYesB = yesB; prevNoB = noB;
 
+      const questions = data.voteQuestions || [];
+      const idx = data.voteCurrentQIndex ?? -1;
+      if (data.voteQuestionVisible && idx >= 0 && questions[idx]) {
+        const item = questions[idx];
+        els.questionOverlay.classList.add("show");
+        els.dispQText.textContent = item.q;
+
+        if (item.choices && item.choices.some((c) => c)) {
+          els.dispChoicesGrid.classList.remove("hidden");
+          els.dispChoicesGrid.innerHTML = item.choices.map((c, i) => {
+            if (!c) return "";
+            const isCorrect = data.voteShowAnswer && i === item.correctIndex;
+            return `<div class="choice-box${isCorrect ? " correct-reveal" : ""}">
+              <div class="choice-letter">${LETTERS[i]}</div>
+              <div class="choice-text">${escapeHtml(c)}</div>
+            </div>`;
+          }).join("");
+        } else {
+          els.dispChoicesGrid.classList.add("hidden");
+          els.dispChoicesGrid.innerHTML = "";
+        }
+
+        if (data.voteShowAnswer) {
+          if (!prevShowAnswer) playRevealSound();
+          els.dispAText.textContent = "เฉลย: " + item.a;
+          els.dispAText.classList.add("show");
+        } else {
+          els.dispAText.classList.remove("show");
+        }
+        prevShowAnswer = data.voteShowAnswer;
+      } else {
+        els.questionOverlay.classList.remove("show");
+        els.dispChoicesGrid.classList.add("hidden");
+        prevShowAnswer = false;
+      }
+
+      buzzerPlayedForThisRun = false;
       overlay.classList.add("hidden");
     }, (err) => console.error(err));
+
+    setInterval(() => {
+      if (!latestData) return;
+      let remaining;
+      if (latestData.voteTimerRunning && latestData.voteTimerEndAt) {
+        remaining = (latestData.voteTimerEndAt - Date.now()) / 1000;
+      } else {
+        remaining = latestData.voteTimerRemaining ?? latestData.voteTimerDuration ?? 0;
+      }
+      const showTimer = latestData.voteTimerRunning || (latestData.voteTimerRemaining && latestData.voteTimerRemaining > 0 && latestData.voteTimerRemaining !== latestData.voteTimerDuration);
+      if (showTimer) {
+        els.timerRibbon.classList.add("show");
+        els.timerRibbon.textContent = fmtTime(remaining);
+        els.timerRibbon.classList.toggle("low", remaining <= 10 && remaining > 0);
+      } else {
+        els.timerRibbon.classList.remove("show");
+      }
+      if (remaining <= 0 && latestData.voteTimerRunning && !buzzerPlayedForThisRun) {
+        buzzerPlayedForThisRun = true;
+        playBuzzerSound();
+      }
+    }, 250);
   }
 </script>
 </body>
