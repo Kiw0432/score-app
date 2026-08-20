@@ -51,7 +51,9 @@
   #controlView { display: none; min-height: 100vh; padding: 16px; flex-direction: column; gap: 16px; }
   .status { text-align: center; font-size: 13px; color: var(--muted); min-height: 18px; }
   .status.error { color: #f87171; }
-  .teams { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; flex: 1; }
+  .section-title { font-size: 14px; font-weight: 700; color: var(--muted); margin: 4px 2px 0; text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .teams { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .team-card {
     background: var(--card-bg); border-radius: 20px; padding: 16px;
     display: flex; flex-direction: column; gap: 12px; border-top: 6px solid var(--c);
@@ -64,19 +66,66 @@
     font-size: 16px; padding: 8px 10px; border-radius: 10px; min-width: 0;
   }
   input[type="color"] { width: 40px; height: 40px; border: none; border-radius: 10px; background: none; padding: 0; cursor: pointer; }
-  .score-display { text-align: center; font-size: 64px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--c); }
+  .score-display { text-align: center; font-size: 56px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--c); }
   .btn-row { display: flex; flex-direction: column; gap: 10px; }
-  button { border: none; border-radius: 14px; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
-  .btn-plus { background: var(--c); color: #fff; font-size: 40px; padding: 20px 0; }
+  button { border: none; border-radius: 14px; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; font-family: inherit; }
+  .btn-plus { background: var(--c); color: #fff; font-size: 36px; padding: 16px 0; }
   .btn-plus:active { filter: brightness(0.85); transform: scale(0.98); }
-  .btn-minus { background: #26292f; color: var(--text); font-size: 24px; padding: 12px 0; }
+  .btn-minus { background: #26292f; color: var(--text); font-size: 22px; padding: 10px 0; }
   .btn-minus:active { filter: brightness(1.2); }
-  .global-actions { display: flex; justify-content: center; gap: 12px; }
-  .btn-reset { background: #26292f; color: #f87171; padding: 12px 24px; font-size: 15px; }
-  .btn-home { background: #26292f; color: var(--muted); padding: 12px 24px; font-size: 15px; text-decoration: none; display: inline-flex; align-items: center; }
+  .global-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+  .btn-reset { background: #26292f; color: #f87171; padding: 12px 20px; font-size: 14px; }
+  .btn-home { background: #26292f; color: var(--muted); padding: 12px 20px; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; }
+  .btn-buzz { background: #26292f; color: #fbbf24; padding: 12px 20px; font-size: 14px; }
+
+  .card { background: var(--card-bg); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .timer-set-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .timer-set-row input {
+    width: 70px; background: #000; border: 1px solid #333; color: var(--text);
+    font-size: 16px; padding: 8px; border-radius: 10px; text-align: center;
+  }
+  .timer-preset-btn { background: #26292f; color: var(--text); padding: 8px 12px; font-size: 13px; }
+  .timer-display-mini { font-size: 40px; font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; }
+  .timer-controls { display: flex; gap: 8px; }
+  .timer-controls button { flex: 1; padding: 12px 0; font-size: 14px; }
+  .btn-start { background: #22c55e; color: #05060a; }
+  .btn-pause { background: #f59e0b; color: #05060a; }
+  .btn-reset-timer { background: #26292f; color: var(--text); }
+
+  .q-add-row { display: flex; flex-direction: column; gap: 8px; }
+  .q-add-row input {
+    background: #000; border: 1px solid #333; color: var(--text);
+    font-size: 15px; padding: 10px; border-radius: 10px;
+  }
+  .btn-add-q { background: #3b82f6; color: #fff; padding: 10px; font-size: 14px; }
+  .q-list { display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto; }
+  .q-item {
+    background: #0d0f13; border-radius: 12px; padding: 10px 12px;
+    display: flex; flex-direction: column; gap: 4px; border: 1px solid #26292f;
+  }
+  .q-item.active { border-color: #3b82f6; }
+  .q-item-text { font-size: 14px; }
+  .q-item-answer { font-size: 12px; color: var(--muted); }
+  .q-item-actions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .q-item-actions button { font-size: 12px; padding: 8px 10px; background: #26292f; color: var(--text); }
+  .q-item-actions .btn-del { color: #f87171; }
+  .q-empty { color: var(--muted); font-size: 13px; text-align: center; padding: 12px 0; }
+
+  .active-q-panel {
+    background: #0d0f13; border: 1px solid #3b82f6; border-radius: 14px; padding: 14px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .active-q-panel .q-text { font-size: 16px; font-weight: 700; }
+  .active-q-panel .a-text { font-size: 14px; color: #4ade80; }
+  .active-q-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .active-q-actions button { font-size: 13px; padding: 10px 14px; }
+  .btn-reveal { background: #f59e0b; color: #05060a; }
+  .btn-award-a { background: var(--team-a-color, #3b82f6); color: #fff; }
+  .btn-award-b { background: var(--team-b-color, #ef4444); color: #fff; }
+  .btn-close-q { background: #26292f; color: var(--text); }
 
   /* ---------- โหมด Display ---------- */
-  #displayView { display: none; height: 100vh; width: 100vw; overflow: hidden; }
+  #displayView { display: none; height: 100vh; width: 100vw; overflow: hidden; position: relative; }
   .board { display: flex; height: 100%; width: 100%; }
   .team { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4vh; position: relative; transition: background 0.3s ease; }
   .team.a { background: linear-gradient(160deg, var(--ca) 0%, #05060a 140%); }
@@ -92,6 +141,32 @@
     background: #05060a; padding: 0.5vw 1.2vw; border-radius: 999px; border: 1px solid rgba(255,255,255,0.15);
   }
 
+  .timer-ribbon {
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    background: #05060a; border: 1px solid rgba(255,255,255,0.15); border-top: none;
+    border-radius: 0 0 20px 20px; padding: 1vh 3vw; z-index: 5;
+    font-size: 6vw; font-weight: 900; font-variant-numeric: tabular-nums;
+    display: none;
+  }
+  .timer-ribbon.show { display: block; }
+  .timer-ribbon.low { color: #f87171; }
+
+  .question-overlay {
+    position: absolute; inset: 0; z-index: 6; display: none;
+    align-items: center; justify-content: center; padding: 5vw;
+    background: rgba(5,6,10,0.88); backdrop-filter: blur(4px);
+  }
+  .question-overlay.show { display: flex; }
+  .question-box {
+    background: #12141a; border: 2px solid #3b82f6; border-radius: 24px;
+    padding: 5vw 6vw; max-width: 80vw; text-align: center;
+    display: flex; flex-direction: column; gap: 3vh;
+  }
+  .question-label { font-size: 1.8vw; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+  .question-text { font-size: 4vw; font-weight: 800; line-height: 1.3; }
+  .answer-text { font-size: 3vw; font-weight: 700; color: #4ade80; display: none; }
+  .answer-text.show { display: block; }
+
   .connecting-overlay {
     position: fixed; inset: 0; background: rgba(5,6,10,0.95); display: flex;
     align-items: center; justify-content: center; font-size: 16px; color: var(--muted); z-index: 10;
@@ -101,7 +176,6 @@
 </head>
 <body>
 
-<!-- ================= หน้าแรก เลือกโหมด ================= -->
 <div id="home">
   <h1>🏆 สกอร์บอร์ด 2 ทีม</h1>
   <p>เลือกโหมดที่ต้องการเปิดในอุปกรณ์นี้</p>
@@ -111,9 +185,9 @@
   </div>
 </div>
 
-<!-- ================= โหมด Control ================= -->
 <div id="controlView">
   <div class="status" id="statusText"></div>
+
   <div class="teams">
     <div class="team-card a">
       <div class="name-row">
@@ -138,13 +212,60 @@
       </div>
     </div>
   </div>
+
   <div class="global-actions">
     <a class="btn-home" href="?">← กลับหน้าแรก</a>
     <button class="btn-reset" id="resetBtn">รีเซ็ตคะแนน</button>
+    <button class="btn-buzz" id="buzzBtn">🔔 กระดิ่ง</button>
+  </div>
+
+  <div class="section-title">⏱ ตั้งเวลา</div>
+  <div class="card">
+    <div class="timer-set-row">
+      <span style="font-size:13px;color:var(--muted)">ตั้ง:</span>
+      <input type="number" id="timerMin" min="0" max="180" value="1" /> นาที
+      <input type="number" id="timerSec" min="0" max="59" value="0" /> วินาที
+      <button class="timer-preset-btn" id="applyTimerSet">ใช้ค่านี้</button>
+    </div>
+    <div class="timer-set-row">
+      <button class="timer-preset-btn" data-preset="30">30 วิ</button>
+      <button class="timer-preset-btn" data-preset="60">1 นาที</button>
+      <button class="timer-preset-btn" data-preset="180">3 นาที</button>
+      <button class="timer-preset-btn" data-preset="300">5 นาที</button>
+    </div>
+    <div class="timer-display-mini" id="timerMiniDisplay">01:00</div>
+    <div class="timer-controls">
+      <button class="btn-start" id="timerStart">▶ เริ่ม</button>
+      <button class="btn-pause" id="timerPause">⏸ พัก</button>
+      <button class="btn-reset-timer" id="timerReset">↺ รีเซ็ต</button>
+    </div>
+  </div>
+
+  <div class="section-title">❓ โจทย์คำถาม</div>
+  <div class="card">
+    <div id="activeQPanel" class="active-q-panel hidden">
+      <div class="q-text" id="activeQText"></div>
+      <div class="a-text hidden" id="activeAText"></div>
+      <div class="active-q-actions">
+        <button class="btn-reveal" id="revealBtn">เฉลย</button>
+        <button class="btn-award-a" id="awardA">ทีม A ตอบถูก +1</button>
+        <button class="btn-award-b" id="awardB">ทีม B ตอบถูก +1</button>
+        <button class="btn-close-q" id="closeQBtn">ปิดคำถามนี้</button>
+      </div>
+    </div>
+
+    <div class="q-add-row">
+      <input type="text" id="newQ" placeholder="พิมพ์คำถาม..." maxlength="200" />
+      <input type="text" id="newA" placeholder="พิมพ์เฉลย..." maxlength="200" />
+      <button class="btn-add-q" id="addQBtn">+ เพิ่มคำถาม</button>
+    </div>
+
+    <div class="q-list" id="qList">
+      <div class="q-empty">ยังไม่มีคำถาม เพิ่มด้านบนได้เลย</div>
+    </div>
   </div>
 </div>
 
-<!-- ================= โหมด Display ================= -->
 <div id="displayView">
   <div class="board" id="board" style="--ca:#3b82f6; --cb:#ef4444;">
     <div class="team a" id="teamA">
@@ -158,6 +279,16 @@
     </div>
     <div class="vs">VS</div>
   </div>
+
+  <div class="timer-ribbon" id="timerRibbon">01:00</div>
+
+  <div class="question-overlay" id="questionOverlay">
+    <div class="question-box">
+      <div class="question-label">คำถาม</div>
+      <div class="question-text" id="dispQText"></div>
+      <div class="answer-text" id="dispAText"></div>
+    </div>
+  </div>
 </div>
 
 <div id="connectingOverlay" class="connecting-overlay hidden">กำลังเชื่อมต่อ...</div>
@@ -168,9 +299,6 @@
     getFirestore, doc, getDoc, setDoc, updateDoc, increment, onSnapshot
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-  // ============================================
-  // Firebase config ของคุณ
-  // ============================================
   const firebaseConfig = {
     apiKey: "AIzaSyBJ0gDwu1MEvetUQuJnAEGdntjpRgsz6mo",
     authDomain: "score-app-a1571.firebaseapp.com",
@@ -184,11 +312,19 @@
     scoreA: 0, scoreB: 0,
     nameA: "ทีม A", nameB: "ทีม B",
     colorA: "#3b82f6", colorB: "#ef4444",
+    timerDuration: 60,
+    timerRemaining: 60,
+    timerRunning: false,
+    timerEndAt: null,
+    buzzAt: 0,
+    questions: [],
+    currentQIndex: -1,
+    questionVisible: false,
+    showAnswer: false,
   };
 
-  // ---------- สลับโหมดตาม URL parameter ----------
   const params = new URLSearchParams(window.location.search);
-  const mode = params.get("mode"); // "display" | "control" | null
+  const mode = params.get("mode");
 
   const homeEl = document.getElementById("home");
   const controlEl = document.getElementById("controlView");
@@ -206,7 +342,6 @@
     overlay.classList.remove("hidden");
     runDisplayMode();
   }
-  // ถ้าไม่มี mode -> แสดงหน้าแรกเฉยๆ ไม่ต้องต่อ Firebase
 
   function initFirebase() {
     const app = initializeApp(firebaseConfig);
@@ -214,7 +349,38 @@
     return doc(db, SCORE_DOC_PATH.collection, SCORE_DOC_PATH.doc);
   }
 
-  // ================= โหมด Control =================
+  function fmtTime(totalSeconds) {
+    const s = Math.max(0, Math.round(totalSeconds));
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
+  }
+
+  let audioCtx = null;
+  function ensureAudio() {
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+    }
+    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+  }
+  function beep(freq = 880, duration = 0.15, type = "sine", delay = 0, volume = 0.25) {
+    if (!audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(volume, audioCtx.currentTime + delay);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(audioCtx.currentTime + delay);
+    osc.stop(audioCtx.currentTime + delay + duration);
+  }
+  function playScoreSound() { ensureAudio(); beep(700, 0.08, "sine", 0, 0.3); beep(1000, 0.15, "sine", 0.08, 0.3); }
+  function playBuzzerSound() { ensureAudio(); beep(180, 0.5, "sawtooth", 0, 0.3); beep(160, 0.5, "sawtooth", 0.05, 0.25); }
+  function playBellSound() { ensureAudio(); beep(1200, 0.3, "sine", 0, 0.25); }
+  function playRevealSound() { ensureAudio(); beep(500, 0.1, "triangle", 0, 0.2); beep(750, 0.15, "triangle", 0.1, 0.2); }
+
   async function runControlMode() {
     const scoreRef = initFirebase();
     const statusText = document.getElementById("statusText");
@@ -226,10 +392,21 @@
       nameB: document.getElementById("nameB"),
       colorA: document.getElementById("colorA"),
       colorB: document.getElementById("colorB"),
+      timerMin: document.getElementById("timerMin"),
+      timerSec: document.getElementById("timerSec"),
+      timerMiniDisplay: document.getElementById("timerMiniDisplay"),
+      qList: document.getElementById("qList"),
+      activeQPanel: document.getElementById("activeQPanel"),
+      activeQText: document.getElementById("activeQText"),
+      activeAText: document.getElementById("activeAText"),
     };
 
     let isTypingName = false;
     let saveNameTimeout = null;
+    let latestData = null;
+    let tickInterval = null;
+
+    document.body.addEventListener("click", ensureAudio, { once: true });
 
     try {
       const snap = await getDoc(scoreRef);
@@ -243,6 +420,8 @@
     onSnapshot(scoreRef, (snap) => {
       if (!snap.exists()) return;
       const data = snap.data();
+      latestData = data;
+
       els.scoreA.textContent = data.scoreA ?? 0;
       els.scoreB.textContent = data.scoreB ?? 0;
       document.documentElement.style.setProperty("--team-a-color", data.colorA || "#3b82f6");
@@ -253,6 +432,10 @@
         els.colorA.value = data.colorA || "#3b82f6";
         els.colorB.value = data.colorB || "#ef4444";
       }
+
+      renderTimer();
+      renderQuestions(data);
+
       overlay.classList.add("hidden");
     }, (err) => {
       statusText.textContent = "การเชื่อมต่อขาดหาย กำลังลองใหม่...";
@@ -268,7 +451,6 @@
         console.error(err);
       });
     }
-
     document.getElementById("plusA").addEventListener("click", () => addScore("A", 1));
     document.getElementById("minusA").addEventListener("click", () => addScore("A", -1));
     document.getElementById("plusB").addEventListener("click", () => addScore("B", 1));
@@ -280,6 +462,11 @@
       }
     });
 
+    document.getElementById("buzzBtn").addEventListener("click", () => {
+      ensureAudio();
+      updateDoc(scoreRef, { buzzAt: Date.now() }).catch(console.error);
+    });
+
     function debounceSaveNames() {
       clearTimeout(saveNameTimeout);
       saveNameTimeout = setTimeout(() => {
@@ -289,18 +476,150 @@
         }).catch(console.error);
       }, 400);
     }
-
     [els.nameA, els.nameB].forEach((input) => {
       input.addEventListener("focus", () => { isTypingName = true; });
       input.addEventListener("blur", () => { isTypingName = false; });
       input.addEventListener("input", debounceSaveNames);
     });
-
     els.colorA.addEventListener("input", () => updateDoc(scoreRef, { colorA: els.colorA.value }).catch(console.error));
     els.colorB.addEventListener("input", () => updateDoc(scoreRef, { colorB: els.colorB.value }).catch(console.error));
+
+    function renderTimer() {
+      if (!latestData) return;
+      let remaining;
+      if (latestData.timerRunning && latestData.timerEndAt) {
+        remaining = (latestData.timerEndAt - Date.now()) / 1000;
+      } else {
+        remaining = latestData.timerRemaining ?? latestData.timerDuration ?? 60;
+      }
+      els.timerMiniDisplay.textContent = fmtTime(remaining);
+    }
+    if (!tickInterval) tickInterval = setInterval(renderTimer, 250);
+
+    document.getElementById("applyTimerSet").addEventListener("click", () => {
+      const mins = parseInt(els.timerMin.value, 10) || 0;
+      const secs = parseInt(els.timerSec.value, 10) || 0;
+      const total = mins * 60 + secs;
+      updateDoc(scoreRef, { timerDuration: total, timerRemaining: total, timerRunning: false, timerEndAt: null }).catch(console.error);
+    });
+
+    document.querySelectorAll(".timer-preset-btn[data-preset]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const total = parseInt(btn.dataset.preset, 10);
+        updateDoc(scoreRef, { timerDuration: total, timerRemaining: total, timerRunning: false, timerEndAt: null }).catch(console.error);
+      });
+    });
+
+    document.getElementById("timerStart").addEventListener("click", () => {
+      ensureAudio();
+      if (!latestData) return;
+      const remaining = latestData.timerRunning && latestData.timerEndAt
+        ? (latestData.timerEndAt - Date.now()) / 1000
+        : (latestData.timerRemaining ?? latestData.timerDuration ?? 60);
+      if (remaining <= 0) return;
+      const endAt = Date.now() + remaining * 1000;
+      updateDoc(scoreRef, { timerRunning: true, timerEndAt: endAt }).catch(console.error);
+    });
+
+    document.getElementById("timerPause").addEventListener("click", () => {
+      if (!latestData) return;
+      const remaining = latestData.timerRunning && latestData.timerEndAt
+        ? Math.max(0, (latestData.timerEndAt - Date.now()) / 1000)
+        : (latestData.timerRemaining ?? latestData.timerDuration ?? 60);
+      updateDoc(scoreRef, { timerRunning: false, timerRemaining: remaining, timerEndAt: null }).catch(console.error);
+    });
+
+    document.getElementById("timerReset").addEventListener("click", () => {
+      if (!latestData) return;
+      const total = latestData.timerDuration ?? 60;
+      updateDoc(scoreRef, { timerRunning: false, timerRemaining: total, timerEndAt: null }).catch(console.error);
+    });
+
+    function renderQuestions(data) {
+      const questions = data.questions || [];
+      const idx = data.currentQIndex ?? -1;
+
+      if (data.questionVisible && idx >= 0 && questions[idx]) {
+        els.activeQPanel.classList.remove("hidden");
+        els.activeQText.textContent = questions[idx].q;
+        if (data.showAnswer) {
+          els.activeAText.textContent = "เฉลย: " + questions[idx].a;
+          els.activeAText.classList.remove("hidden");
+        } else {
+          els.activeAText.classList.add("hidden");
+        }
+      } else {
+        els.activeQPanel.classList.add("hidden");
+      }
+
+      if (questions.length === 0) {
+        els.qList.innerHTML = '<div class="q-empty">ยังไม่มีคำถาม เพิ่มด้านบนได้เลย</div>';
+        return;
+      }
+
+      els.qList.innerHTML = "";
+      questions.forEach((item, i) => {
+        const div = document.createElement("div");
+        div.className = "q-item" + (i === idx && data.questionVisible ? " active" : "");
+        div.innerHTML = `
+          <div class="q-item-text">${i + 1}. ${escapeHtml(item.q)}</div>
+          <div class="q-item-answer">เฉลย: ${escapeHtml(item.a)}</div>
+          <div class="q-item-actions">
+            <button data-act="show" data-idx="${i}">📺 โชว์ข้อนี้</button>
+            <button data-act="del" data-idx="${i}" class="btn-del">🗑 ลบ</button>
+          </div>
+        `;
+        els.qList.appendChild(div);
+      });
+
+      els.qList.querySelectorAll("button[data-act]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const i = parseInt(btn.dataset.idx, 10);
+          if (btn.dataset.act === "show") {
+            ensureAudio();
+            updateDoc(scoreRef, { currentQIndex: i, questionVisible: true, showAnswer: false }).catch(console.error);
+          } else if (btn.dataset.act === "del") {
+            if (confirm("ลบคำถามข้อนี้?")) {
+              const newQuestions = questions.slice();
+              newQuestions.splice(i, 1);
+              updateDoc(scoreRef, { questions: newQuestions, questionVisible: false, currentQIndex: -1 }).catch(console.error);
+            }
+          }
+        });
+      });
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    document.getElementById("addQBtn").addEventListener("click", () => {
+      const qInput = document.getElementById("newQ");
+      const aInput = document.getElementById("newA");
+      const q = qInput.value.trim();
+      const a = aInput.value.trim();
+      if (!q || !a) { alert("กรอกทั้งคำถามและเฉลย"); return; }
+      const existing = (latestData && latestData.questions) || [];
+      updateDoc(scoreRef, { questions: [...existing, { q, a }] }).catch(console.error);
+      qInput.value = "";
+      aInput.value = "";
+    });
+
+    document.getElementById("revealBtn").addEventListener("click", () => {
+      ensureAudio();
+      updateDoc(scoreRef, { showAnswer: true }).catch(console.error);
+    });
+
+    document.getElementById("awardA").addEventListener("click", () => addScore("A", 1));
+    document.getElementById("awardB").addEventListener("click", () => addScore("B", 1));
+
+    document.getElementById("closeQBtn").addEventListener("click", () => {
+      updateDoc(scoreRef, { questionVisible: false }).catch(console.error);
+    });
   }
 
-  // ================= โหมด Display =================
   function runDisplayMode() {
     const scoreRef = initFirebase();
     const els = {
@@ -309,10 +628,29 @@
       nameA: document.getElementById("dispNameA"),
       nameB: document.getElementById("dispNameB"),
       board: document.getElementById("board"),
+      timerRibbon: document.getElementById("timerRibbon"),
+      questionOverlay: document.getElementById("questionOverlay"),
+      dispQText: document.getElementById("dispQText"),
+      dispAText: document.getElementById("dispAText"),
     };
 
     let prevA = null;
     let prevB = null;
+    let prevBuzzAt = 0;
+    let prevShowAnswer = false;
+    let latestData = null;
+    let buzzerPlayedForThisRun = false;
+    let audioUnlocked = false;
+
+    function tryUnlockAudio() {
+      if (audioUnlocked) return;
+      ensureAudio();
+      audioUnlocked = true;
+      document.removeEventListener("click", tryUnlockAudio);
+      document.removeEventListener("touchstart", tryUnlockAudio);
+    }
+    document.addEventListener("click", tryUnlockAudio);
+    document.addEventListener("touchstart", tryUnlockAudio);
 
     function pulse(el) {
       el.classList.remove("pulse");
@@ -323,6 +661,8 @@
     onSnapshot(scoreRef, (snap) => {
       if (!snap.exists()) return;
       const data = snap.data();
+      latestData = data;
+
       const a = data.scoreA ?? 0;
       const b = data.scoreB ?? 0;
 
@@ -333,13 +673,59 @@
       els.board.style.setProperty("--ca", data.colorA || "#3b82f6");
       els.board.style.setProperty("--cb", data.colorB || "#ef4444");
 
-      if (prevA !== null && a !== prevA) pulse(els.scoreA);
-      if (prevB !== null && b !== prevB) pulse(els.scoreB);
+      if (prevA !== null && a !== prevA) { pulse(els.scoreA); playScoreSound(); }
+      if (prevB !== null && b !== prevB) { pulse(els.scoreB); playScoreSound(); }
       prevA = a;
       prevB = b;
 
+      if (data.buzzAt && data.buzzAt !== prevBuzzAt) {
+        if (prevBuzzAt !== 0) playBellSound();
+        prevBuzzAt = data.buzzAt;
+      }
+
+      const questions = data.questions || [];
+      const idx = data.currentQIndex ?? -1;
+      if (data.questionVisible && idx >= 0 && questions[idx]) {
+        els.questionOverlay.classList.add("show");
+        els.dispQText.textContent = questions[idx].q;
+        if (data.showAnswer) {
+          if (!prevShowAnswer) playRevealSound();
+          els.dispAText.textContent = "เฉลย: " + questions[idx].a;
+          els.dispAText.classList.add("show");
+        } else {
+          els.dispAText.classList.remove("show");
+        }
+        prevShowAnswer = data.showAnswer;
+      } else {
+        els.questionOverlay.classList.remove("show");
+        prevShowAnswer = false;
+      }
+
+      buzzerPlayedForThisRun = false;
       overlay.classList.add("hidden");
     }, (err) => console.error(err));
+
+    setInterval(() => {
+      if (!latestData) return;
+      let remaining;
+      if (latestData.timerRunning && latestData.timerEndAt) {
+        remaining = (latestData.timerEndAt - Date.now()) / 1000;
+      } else {
+        remaining = latestData.timerRemaining ?? latestData.timerDuration ?? 0;
+      }
+      const showTimer = latestData.timerRunning || (latestData.timerRemaining && latestData.timerRemaining > 0 && latestData.timerRemaining !== latestData.timerDuration);
+      if (showTimer) {
+        els.timerRibbon.classList.add("show");
+        els.timerRibbon.textContent = fmtTime(remaining);
+        els.timerRibbon.classList.toggle("low", remaining <= 10 && remaining > 0);
+      } else {
+        els.timerRibbon.classList.remove("show");
+      }
+      if (remaining <= 0 && latestData.timerRunning && !buzzerPlayedForThisRun) {
+        buzzerPlayedForThisRun = true;
+        playBuzzerSound();
+      }
+    }, 250);
   }
 </script>
 </body>
