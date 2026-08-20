@@ -206,6 +206,19 @@
   }
   .grand-total-ribbon b { color: var(--text); }
 
+  .live-score-ribbon {
+    position: absolute; top: 0; right: 0; display: none; gap: 1.4vw;
+    background: #05060a; border: 1px solid rgba(255,255,255,0.15); border-right: none; border-top: none;
+    border-radius: 0 0 0 18px; padding: 0.8vh 1.6vw; z-index: 7;
+    font-size: 1.2vw; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums;
+  }
+  .live-score-ribbon.show { display: flex; }
+  .live-score-ribbon .lsr-team { display: flex; align-items: center; gap: 0.5vw; white-space: nowrap; }
+  .live-score-ribbon .lsr-name { color: var(--text); }
+  .live-score-ribbon .lsr-yes { color: var(--yes); }
+  .live-score-ribbon .lsr-no { color: var(--no); }
+  .live-score-ribbon .lsr-sep { color: rgba(255,255,255,0.2); }
+
   .timer-ribbon {
     position: absolute; top: 0; left: 50%; transform: translateX(-50%);
     background: #05060a; border: 1px solid rgba(255,255,255,0.15); border-top: none;
@@ -435,6 +448,19 @@
     <div class="vs">VS</div>
   </div>
   <div class="grand-total-ribbon">นับแล้ว <b id="dispGrandTotal">0</b> / <span id="dispGrandTarget">700</span> คน</div>
+  <div class="live-score-ribbon" id="liveScoreRibbon">
+    <span class="lsr-team a">
+      <span class="lsr-name" id="lsrNameA">ทีม A</span>
+      ✅<span class="lsr-yes" id="lsrYesA">0</span>
+      ❌<span class="lsr-no" id="lsrNoA">0</span>
+    </span>
+    <span class="lsr-sep">|</span>
+    <span class="lsr-team b">
+      <span class="lsr-name" id="lsrNameB">ทีม B</span>
+      ✅<span class="lsr-yes" id="lsrYesB">0</span>
+      ❌<span class="lsr-no" id="lsrNoB">0</span>
+    </span>
+  </div>
 
   <div class="timer-ribbon" id="timerRibbon">01:00</div>
 
@@ -954,6 +980,10 @@
       dispQText: document.getElementById("dispQText"),
       dispAText: document.getElementById("dispAText"),
       dispChoicesGrid: document.getElementById("dispChoicesGrid"),
+      liveScoreRibbon: document.getElementById("liveScoreRibbon"),
+      lsrNameA: document.getElementById("lsrNameA"), lsrNameB: document.getElementById("lsrNameB"),
+      lsrYesA: document.getElementById("lsrYesA"), lsrNoA: document.getElementById("lsrNoA"),
+      lsrYesB: document.getElementById("lsrYesB"), lsrNoB: document.getElementById("lsrNoB"),
     };
     const LETTERS = THAI_LETTERS;
 
@@ -994,6 +1024,13 @@
       els.board.style.setProperty("--ca", data.voteColorA || "#3b82f6");
       els.board.style.setProperty("--cb", data.voteColorB || "#f59e0b");
 
+      els.lsrNameA.textContent = data.voteNameA || "ทีม A";
+      els.lsrNameB.textContent = data.voteNameB || "ทีม B";
+      els.lsrYesA.textContent = yesA;
+      els.lsrNoA.textContent = noA;
+      els.lsrYesB.textContent = yesB;
+      els.lsrNoB.textContent = noB;
+
       els.yesA.textContent = yesA;
       els.noA.textContent = noA;
       els.yesB.textContent = yesB;
@@ -1018,6 +1055,7 @@
       if (data.voteQuestionVisible && idx >= 0 && questions[idx]) {
         const item = questions[idx];
         els.questionOverlay.classList.add("show");
+        els.liveScoreRibbon.classList.add("show");
         els.dispQText.textContent = item.q;
 
         if (item.choices && item.choices.some((c) => c)) {
@@ -1045,6 +1083,7 @@
         prevShowAnswer = data.voteShowAnswer;
       } else {
         els.questionOverlay.classList.remove("show");
+        els.liveScoreRibbon.classList.remove("show");
         els.dispChoicesGrid.classList.add("hidden");
         prevShowAnswer = false;
       }
