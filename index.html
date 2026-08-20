@@ -278,12 +278,14 @@
     messagingSenderId: "1024620222075",
     appId: "1:1024620222075:web:f5abdb4e3f1d19931d34de",
   };
-  // ใช้ collection เดิม "scoreboard" ที่ Firestore Rules อนุญาตอยู่แล้ว
-  // แค่แยกคนละ document (votepoll) เพื่อไม่ให้ข้อมูลชนกับสกอร์บอร์ดเดิม
-  const VOTE_DOC_PATH = { collection: "scoreboard", doc: "votepoll" };
+  // ใช้ document เดียวกันเป๊ะกับแอปสกอร์บอร์ดเดิม (scoreboard/current)
+  // เพราะ Firestore Rules อนุญาตเฉพาะ document นี้เท่านั้น
+  // ฟิลด์ของสองแอปคนละชื่อกัน (scoreA/scoreB ของเดิม vs yesA/noA/... ของอันนี้)
+  // จึงอยู่ร่วมกันใน document เดียวได้โดยไม่ทับข้อมูลกัน
+  const VOTE_DOC_PATH = { collection: "scoreboard", doc: "current" };
   const DEFAULT_STATE = {
-    nameA: "ทีม A", nameB: "ทีม B",
-    colorA: "#3b82f6", colorB: "#f59e0b",
+    voteNameA: "ทีม A", voteNameB: "ทีม B",
+    voteColorA: "#3b82f6", voteColorB: "#f59e0b",
     yesA: 0, noA: 0, yesB: 0, noB: 0,
     targetA: 350, targetB: 350,
   };
@@ -364,7 +366,9 @@
 
     try {
       const snap = await getDoc(voteRef);
-      if (!snap.exists()) await setDoc(voteRef, DEFAULT_STATE);
+      if (!snap.exists() || snap.data().yesA === undefined) {
+        await setDoc(voteRef, DEFAULT_STATE, { merge: true });
+      }
     } catch (err) {
       statusText.textContent = "เชื่อมต่อ Firebase ไม่สำเร็จ ตรวจสอบ config และ Rules";
       statusText.classList.add("error");
@@ -390,14 +394,14 @@
       els.progressA.style.width = Math.min(100, ((yesA + noA) / (targetA || 1)) * 100) + "%";
       els.progressB.style.width = Math.min(100, ((yesB + noB) / (targetB || 1)) * 100) + "%";
 
-      document.documentElement.style.setProperty("--team-a-color", data.colorA || "#3b82f6");
-      document.documentElement.style.setProperty("--team-b-color", data.colorB || "#f59e0b");
+      document.documentElement.style.setProperty("--team-a-color", data.voteColorA || "#3b82f6");
+      document.documentElement.style.setProperty("--team-b-color", data.voteColorB || "#f59e0b");
 
       if (!isTypingName) {
-        if (document.activeElement !== els.nameA) els.nameA.value = data.nameA ?? "ทีม A";
-        if (document.activeElement !== els.nameB) els.nameB.value = data.nameB ?? "ทีม B";
-        els.colorA.value = data.colorA || "#3b82f6";
-        els.colorB.value = data.colorB || "#f59e0b";
+        if (document.activeElement !== els.nameA) els.nameA.value = data.voteNameA ?? "ทีม A";
+        if (document.activeElement !== els.nameB) els.nameB.value = data.voteNameB ?? "ทีม B";
+        els.colorA.value = data.voteColorA || "#3b82f6";
+        els.colorB.value = data.voteColorB || "#f59e0b";
       }
       if (!isTypingTarget) {
         if (document.activeElement !== els.targetA) els.targetA.value = targetA;
@@ -442,8 +446,8 @@
       clearTimeout(saveNameTimeout);
       saveNameTimeout = setTimeout(() => {
         updateDoc(voteRef, {
-          nameA: els.nameA.value || "ทีม A",
-          nameB: els.nameB.value || "ทีม B",
+          voteNameA: els.nameA.value || "ทีม A",
+          voteNameB: els.nameB.value || "ทีม B",
         }).catch(console.error);
       }, 400);
     }
@@ -452,8 +456,8 @@
       input.addEventListener("blur", () => { isTypingName = false; });
       input.addEventListener("input", debounceSaveNames);
     });
-    els.colorA.addEventListener("input", () => updateDoc(voteRef, { colorA: els.colorA.value }).catch(console.error));
-    els.colorB.addEventListener("input", () => updateDoc(voteRef, { colorB: els.colorB.value }).catch(console.error));
+    els.colorA.addEventListener("input", () => updateDoc(voteRef, { voteColorA: els.colorA.value }).catch(console.error));
+    els.colorB.addEventListener("input", () => updateDoc(voteRef, { voteColorB: els.colorB.value }).catch(console.error));
 
     function debounceSaveTargets() {
       clearTimeout(saveTargetTimeout);
@@ -508,10 +512,10 @@
       const yesB = data.yesB ?? 0, noB = data.noB ?? 0;
       const targetA = data.targetA ?? 350, targetB = data.targetB ?? 350;
 
-      els.nameA.textContent = data.nameA || "ทีม A";
-      els.nameB.textContent = data.nameB || "ทีม B";
-      els.board.style.setProperty("--ca", data.colorA || "#3b82f6");
-      els.board.style.setProperty("--cb", data.colorB || "#f59e0b");
+      els.nameA.textContent = data.voteNameA || "ทีม A";
+      els.nameB.textContent = data.voteNameB || "ทีม B";
+      els.board.style.setProperty("--ca", data.voteColorA || "#3b82f6");
+      els.board.style.setProperty("--cb", data.voteColorB || "#f59e0b");
 
       els.yesA.textContent = yesA;
       els.noA.textContent = noA;
