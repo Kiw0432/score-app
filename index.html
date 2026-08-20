@@ -483,6 +483,10 @@
     voteShowAnswer: false,
   };
 
+  const THAI_LETTERS = ["ก", "ข", "ค", "ง", "จ", "ฉ", "ช", "ซ", "ฌ", "ญ"];
+  const MAX_CHOICES = THAI_LETTERS.length;
+  const MIN_CHOICES = 0;
+
   const params = new URLSearchParams(window.location.search);
   const mode = params.get("mode");
 
@@ -515,10 +519,6 @@
     const sec = s % 60;
     return String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
   }
-
-  const THAI_LETTERS = ["ก", "ข", "ค", "ง", "จ", "ฉ", "ช", "ซ", "ฌ", "ญ"];
-  const MAX_CHOICES = THAI_LETTERS.length;
-  const MIN_CHOICES = 0;
 
   function escapeHtml(str) {
     const div = document.createElement("div");
