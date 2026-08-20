@@ -278,8 +278,9 @@
     messagingSenderId: "1024620222075",
     appId: "1:1024620222075:web:f5abdb4e3f1d19931d34de",
   };
-  // เก็บข้อมูลแยกคนละ document กับสกอร์บอร์ดเดิม เพื่อไม่ให้ข้อมูลชนกัน
-  const VOTE_DOC_PATH = { collection: "votepoll", doc: "current" };
+  // ใช้ collection เดิม "scoreboard" ที่ Firestore Rules อนุญาตอยู่แล้ว
+  // แค่แยกคนละ document (votepoll) เพื่อไม่ให้ข้อมูลชนกับสกอร์บอร์ดเดิม
+  const VOTE_DOC_PATH = { collection: "scoreboard", doc: "votepoll" };
   const DEFAULT_STATE = {
     nameA: "ทีม A", nameB: "ทีม B",
     colorA: "#3b82f6", colorB: "#f59e0b",
