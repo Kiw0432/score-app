@@ -117,6 +117,14 @@
   }
   .active-q-panel .q-text { font-size: 16px; font-weight: 700; }
   .active-q-panel .a-text { font-size: 14px; color: #4ade80; }
+  .choice-inputs { display: flex; flex-direction: column; gap: 6px; }
+  .choice-inputs .choice-row { display: flex; align-items: center; gap: 8px; }
+  .choice-inputs .choice-letter { width: 22px; font-weight: 700; color: var(--muted); font-size: 14px; flex-shrink: 0; }
+  .choice-inputs input[type="text"] { flex: 1; background: #000; border: 1px solid #333; color: var(--text); font-size: 14px; padding: 8px 10px; border-radius: 10px; }
+  .choice-inputs input[type="radio"] { width: 18px; height: 18px; flex-shrink: 0; }
+  .active-choices { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+  .active-choice-item { background: #16181e; border: 1px solid #26292f; border-radius: 10px; padding: 8px 10px; font-size: 13px; }
+  .active-choice-item.correct-reveal { border-color: #4ade80; color: #4ade80; }
   .active-q-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   .active-q-actions button { font-size: 13px; padding: 10px 14px; }
   .btn-reveal { background: #f59e0b; color: #05060a; }
@@ -166,6 +174,24 @@
   .question-text { font-size: 4vw; font-weight: 800; line-height: 1.3; }
   .answer-text { font-size: 3vw; font-weight: 700; color: #4ade80; display: none; }
   .answer-text.show { display: block; }
+  .choices-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5vw;
+    margin-top: 1vh;
+  }
+  .choice-box {
+    background: #0d0f13; border: 2px solid #333; border-radius: 14px;
+    padding: 1.5vw 1.8vw; display: flex; align-items: center; gap: 1vw;
+    text-align: left; transition: all 0.3s ease;
+  }
+  .choice-box .choice-letter {
+    font-size: 1.8vw; font-weight: 900; color: var(--muted);
+    background: #1a1d24; border-radius: 8px; width: 2.8vw; height: 2.8vw;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .choice-box .choice-text { font-size: 1.8vw; font-weight: 600; }
+  .choice-box.correct-reveal { border-color: #4ade80; background: rgba(74, 222, 128, 0.12); }
+  .choice-box.correct-reveal .choice-letter { background: #4ade80; color: #05060a; }
+  .choice-box.correct-reveal .choice-text { color: #4ade80; }
 
   .connecting-overlay {
     position: fixed; inset: 0; background: rgba(5,6,10,0.95); display: flex;
@@ -245,6 +271,7 @@
   <div class="card">
     <div id="activeQPanel" class="active-q-panel hidden">
       <div class="q-text" id="activeQText"></div>
+      <div class="active-choices" id="activeChoices"></div>
       <div class="a-text hidden" id="activeAText"></div>
       <div class="active-q-actions">
         <button class="btn-reveal" id="revealBtn">เฉลย</button>
@@ -256,7 +283,30 @@
 
     <div class="q-add-row">
       <input type="text" id="newQ" placeholder="พิมพ์คำถาม..." maxlength="200" />
-      <input type="text" id="newA" placeholder="พิมพ์เฉลย..." maxlength="200" />
+      <div class="choice-inputs">
+        <div class="choice-row">
+          <input type="radio" name="correctChoice" value="0" checked />
+          <span class="choice-letter">ก</span>
+          <input type="text" id="newC0" placeholder="ตัวเลือก ก (เว้นว่างได้ถ้าไม่ใช้แบบเลือกตอบ)" maxlength="100" />
+        </div>
+        <div class="choice-row">
+          <input type="radio" name="correctChoice" value="1" />
+          <span class="choice-letter">ข</span>
+          <input type="text" id="newC1" placeholder="ตัวเลือก ข" maxlength="100" />
+        </div>
+        <div class="choice-row">
+          <input type="radio" name="correctChoice" value="2" />
+          <span class="choice-letter">ค</span>
+          <input type="text" id="newC2" placeholder="ตัวเลือก ค" maxlength="100" />
+        </div>
+        <div class="choice-row">
+          <input type="radio" name="correctChoice" value="3" />
+          <span class="choice-letter">ง</span>
+          <input type="text" id="newC3" placeholder="ตัวเลือก ง" maxlength="100" />
+        </div>
+        <span style="font-size:12px;color:var(--muted)">ติ๊กวงกลมหน้าข้อที่ถูก (ใช้เมื่อกรอกตัวเลือกไว้)</span>
+      </div>
+      <input type="text" id="newA" placeholder="พิมพ์เฉลย / คำอธิบายเพิ่มเติม..." maxlength="200" />
       <button class="btn-add-q" id="addQBtn">+ เพิ่มคำถาม</button>
     </div>
 
@@ -286,6 +336,7 @@
     <div class="question-box">
       <div class="question-label">คำถาม</div>
       <div class="question-text" id="dispQText"></div>
+      <div class="choices-grid hidden" id="dispChoicesGrid"></div>
       <div class="answer-text" id="dispAText"></div>
     </div>
   </div>
@@ -539,11 +590,26 @@
       const questions = data.questions || [];
       const idx = data.currentQIndex ?? -1;
 
+      const LETTERS = ["ก", "ข", "ค", "ง"];
+
       if (data.questionVisible && idx >= 0 && questions[idx]) {
+        const item = questions[idx];
         els.activeQPanel.classList.remove("hidden");
-        els.activeQText.textContent = questions[idx].q;
+        els.activeQText.textContent = item.q;
+
+        const choicesEl = document.getElementById("activeChoices");
+        if (item.choices && item.choices.some((c) => c)) {
+          choicesEl.innerHTML = item.choices.map((c, i) => {
+            if (!c) return "";
+            const isCorrect = data.showAnswer && i === item.correctIndex;
+            return `<div class="active-choice-item${isCorrect ? " correct-reveal" : ""}">${LETTERS[i]}. ${escapeHtml(c)}</div>`;
+          }).join("");
+        } else {
+          choicesEl.innerHTML = "";
+        }
+
         if (data.showAnswer) {
-          els.activeAText.textContent = "เฉลย: " + questions[idx].a;
+          els.activeAText.textContent = "เฉลย: " + item.a;
           els.activeAText.classList.remove("hidden");
         } else {
           els.activeAText.classList.add("hidden");
@@ -561,8 +627,12 @@
       questions.forEach((item, i) => {
         const div = document.createElement("div");
         div.className = "q-item" + (i === idx && data.questionVisible ? " active" : "");
+        const choicesLine = (item.choices && item.choices.some((c) => c))
+          ? item.choices.map((c, ci) => c ? `${LETTERS[ci]}${ci === item.correctIndex ? "✓" : ""}: ${escapeHtml(c)}` : "").filter(Boolean).join(" | ")
+          : "";
         div.innerHTML = `
           <div class="q-item-text">${i + 1}. ${escapeHtml(item.q)}</div>
+          ${choicesLine ? `<div class="q-item-answer">${choicesLine}</div>` : ""}
           <div class="q-item-answer">เฉลย: ${escapeHtml(item.a)}</div>
           <div class="q-item-actions">
             <button data-act="show" data-idx="${i}">📺 โชว์ข้อนี้</button>
@@ -598,13 +668,32 @@
     document.getElementById("addQBtn").addEventListener("click", () => {
       const qInput = document.getElementById("newQ");
       const aInput = document.getElementById("newA");
+      const c0 = document.getElementById("newC0");
+      const c1 = document.getElementById("newC1");
+      const c2 = document.getElementById("newC2");
+      const c3 = document.getElementById("newC3");
       const q = qInput.value.trim();
       const a = aInput.value.trim();
-      if (!q || !a) { alert("กรอกทั้งคำถามและเฉลย"); return; }
+      const rawChoices = [c0.value.trim(), c1.value.trim(), c2.value.trim(), c3.value.trim()];
+      const hasChoices = rawChoices.some((c) => c !== "");
+      if (!q) { alert("กรอกคำถามด้วย"); return; }
+      if (!hasChoices && !a) { alert("กรอกเฉลย หรือกรอกตัวเลือกอย่างน้อย 1 ช่อง"); return; }
+
+      const newItem = { q, a };
+      if (hasChoices) {
+        const checkedRadio = document.querySelector('input[name="correctChoice"]:checked');
+        const correctIndex = checkedRadio ? parseInt(checkedRadio.value, 10) : 0;
+        newItem.choices = rawChoices;
+        newItem.correctIndex = correctIndex;
+        if (!a) newItem.a = rawChoices[correctIndex] || "";
+      }
+
       const existing = (latestData && latestData.questions) || [];
-      updateDoc(scoreRef, { questions: [...existing, { q, a }] }).catch(console.error);
+      updateDoc(scoreRef, { questions: [...existing, newItem] }).catch(console.error);
       qInput.value = "";
       aInput.value = "";
+      c0.value = ""; c1.value = ""; c2.value = ""; c3.value = "";
+      document.querySelector('input[name="correctChoice"][value="0"]').checked = true;
     });
 
     document.getElementById("revealBtn").addEventListener("click", () => {
@@ -632,7 +721,9 @@
       questionOverlay: document.getElementById("questionOverlay"),
       dispQText: document.getElementById("dispQText"),
       dispAText: document.getElementById("dispAText"),
+      dispChoicesGrid: document.getElementById("dispChoicesGrid"),
     };
+    const LETTERS = ["ก", "ข", "ค", "ง"];
 
     let prevA = null;
     let prevB = null;
@@ -686,11 +777,28 @@
       const questions = data.questions || [];
       const idx = data.currentQIndex ?? -1;
       if (data.questionVisible && idx >= 0 && questions[idx]) {
+        const item = questions[idx];
         els.questionOverlay.classList.add("show");
-        els.dispQText.textContent = questions[idx].q;
+        els.dispQText.textContent = item.q;
+
+        if (item.choices && item.choices.some((c) => c)) {
+          els.dispChoicesGrid.classList.remove("hidden");
+          els.dispChoicesGrid.innerHTML = item.choices.map((c, i) => {
+            if (!c) return "";
+            const isCorrect = data.showAnswer && i === item.correctIndex;
+            return `<div class="choice-box${isCorrect ? " correct-reveal" : ""}">
+              <div class="choice-letter">${LETTERS[i]}</div>
+              <div class="choice-text">${c}</div>
+            </div>`;
+          }).join("");
+        } else {
+          els.dispChoicesGrid.classList.add("hidden");
+          els.dispChoicesGrid.innerHTML = "";
+        }
+
         if (data.showAnswer) {
           if (!prevShowAnswer) playRevealSound();
-          els.dispAText.textContent = "เฉลย: " + questions[idx].a;
+          els.dispAText.textContent = "เฉลย: " + item.a;
           els.dispAText.classList.add("show");
         } else {
           els.dispAText.classList.remove("show");
@@ -698,6 +806,7 @@
         prevShowAnswer = data.showAnswer;
       } else {
         els.questionOverlay.classList.remove("show");
+        els.dispChoicesGrid.classList.add("hidden");
         prevShowAnswer = false;
       }
 
