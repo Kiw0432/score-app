@@ -483,6 +483,7 @@
 
 <div id="displayView">
   <div class="display-controls">
+    <button class="disp-ctrl-btn" id="modeToggleBtnDisplay" title="สลับโหมด">🗳️</button>
     <button class="disp-ctrl-btn" id="fullscreenBtn" title="ขยายเต็มจอ">⛶</button>
     <a class="disp-ctrl-btn" id="homeBtnDisplay" href="?" title="กลับหน้าแรก">🏠</a>
   </div>
@@ -1134,6 +1135,19 @@
     document.addEventListener("fullscreenchange", updateFullscreenBtn);
     updateFullscreenBtn();
 
+    // ---- ปุ่มสลับโหมด (โหวต/คะแนน) จากหน้าจอแสดงเอง ----
+    const modeToggleBtnDisplay = document.getElementById("modeToggleBtnDisplay");
+    let currentBoardMode = "vote";
+    function updateModeToggleBtn() {
+      modeToggleBtnDisplay.textContent = currentBoardMode === "score" ? "🏆" : "🗳️";
+      modeToggleBtnDisplay.title = currentBoardMode === "score" ? "สลับเป็นโหมดโหวต" : "สลับเป็นโหมดคะแนน";
+    }
+    modeToggleBtnDisplay.addEventListener("click", () => {
+      const nextMode = currentBoardMode === "score" ? "vote" : "score";
+      updateDoc(voteRef, { voteBoardMode: nextMode }).catch(console.error);
+    });
+    updateModeToggleBtn();
+
     function pulse(el) {
       el.classList.remove("pulse");
       void el.offsetWidth;
@@ -1158,6 +1172,8 @@
       const targetA = data.targetA ?? 350, targetB = data.targetB ?? 350;
       const scoreA = data.voteScoreA ?? 0, scoreB = data.voteScoreB ?? 0;
       const boardMode = data.voteBoardMode || "vote";
+      currentBoardMode = boardMode;
+      updateModeToggleBtn();
 
       displayEl.classList.toggle("mode-score", boardMode === "score");
       displayEl.classList.toggle("mode-vote", boardMode !== "score");
