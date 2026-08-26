@@ -53,6 +53,21 @@
   .teams-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
   @media (min-width: 620px) { .teams-grid { grid-template-columns: 1fr 1fr; align-items: start; } }
 
+  .mode-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--card-bg); padding: 6px; border-radius: 14px; }
+  .mode-btn { background: transparent; color: var(--muted); padding: 12px 0; font-size: 14px; border-radius: 10px; }
+  .mode-btn.active { background: #22c55e; color: #05060a; }
+
+  .score-block { display: flex; flex-direction: column; align-items: center; gap: 10px; background: #0d0f13; border-radius: 14px; padding: 16px 10px; border: 1px solid #26292f; }
+  .score-count-input {
+    width: 100%; text-align: center; font-size: 64px; font-weight: 900; font-variant-numeric: tabular-nums;
+    line-height: 1; background: transparent; border: none; color: var(--text); font-family: inherit;
+  }
+  .score-count-input:focus { outline: 2px solid rgba(255,255,255,0.25); background: #000; border-radius: 8px; }
+  .score-count-input::-webkit-outer-spin-button, .score-count-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .score-btns { display: flex; gap: 6px; width: 100%; }
+  .score-btns button { flex: 1; padding: 12px 0; font-size: 14px; color: #fff; }
+  .btn-plus-score { background: #22c55e !important; }
+
   .team-card {
     background: var(--card-bg); border-radius: 18px; padding: 14px;
     display: flex; flex-direction: column; gap: 12px; border-top: 6px solid var(--c);
@@ -164,12 +179,12 @@
   .btn-close-q { background: #26292f; color: var(--text); }
 
   /* ---------- โหมด Display ---------- */
-  #displayView { display: none; height: 100vh; width: 100vw; overflow: hidden; position: relative; }
-  .board { display: flex; height: 100%; width: 100%; }
-  .team { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3vh; position: relative; padding: 2vh 2vw; }
+  #displayView { display: none; height: 100vh; width: 100vw; overflow: hidden; position: relative; flex-direction: column; }
+  .board { display: flex; flex: 1 1 auto; min-height: 0; width: 100%; transition: flex-basis 0.25s ease; }
+  .team { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3vh; position: relative; padding: 2vh 2vw; min-height: 0; overflow: hidden; }
   .team.a { background: linear-gradient(160deg, var(--ca) 0%, #05060a 140%); }
   .team.b { background: linear-gradient(200deg, var(--cb) 0%, #05060a 140%); }
-  .team-name { font-size: 4.2vw; font-weight: 700; letter-spacing: 0.02em; text-align: center; padding: 0 3vw; word-break: break-word; }
+  .team-name { font-size: 4.2vw; font-weight: 700; letter-spacing: 0.02em; text-align: center; padding: 0 3vw; word-break: break-word; transition: font-size 0.25s ease; }
 
   .vote-display-row { display: flex; gap: 3vw; }
   .vote-display-block { display: flex; flex-direction: column; align-items: center; gap: 0.6vh; }
@@ -179,15 +194,36 @@
   }
   .vote-display-block.yes .vote-display-label { color: #05060a; background: var(--yes); }
   .vote-display-block.no .vote-display-label { color: #05060a; background: var(--no); }
-  .vote-display-num { font-size: 11vw; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; transition: transform 0.15s ease; }
+  .vote-display-num { font-size: 11vw; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; transition: transform 0.15s ease, font-size 0.25s ease; }
   .vote-display-num.pulse { animation: pulse 0.35s ease; }
   @keyframes pulse { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
 
-  .split-bar { width: 60%; max-width: 420px; height: 1.6vh; border-radius: 999px; overflow: hidden; display: flex; background: #0d0f13; border: 1px solid rgba(255,255,255,0.15); }
+  /* โหมดย่อ ตอนมีคำถามโชว์อยู่ด้านล่าง เพื่อให้เห็นคะแนนโหวตครบ */
+  #displayView.question-active .team-name { font-size: 2.6vw; }
+  #displayView.question-active .vote-display-num { font-size: 6.5vw; }
+  #displayView.question-active .team { gap: 1.5vh; padding: 1vh 2vw; }
+
+  .split-bar { width: 60%; max-width: 420px; height: 1.6vh; border-radius: 999px; overflow: hidden; display: flex; background: #0d0f13; border: 1px solid rgba(255,255,255,0.15); flex-shrink: 0; }
   .split-bar-yes { background: var(--yes); height: 100%; }
   .split-bar-no { background: var(--no); height: 100%; }
 
   .team-total-tag { font-size: 1.4vw; color: rgba(255,255,255,0.55); font-weight: 600; letter-spacing: 0.03em; }
+
+  .score-display-block { display: none; flex-direction: column; align-items: center; gap: 1vh; }
+  .score-display-label {
+    font-size: 1.8vw; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.55);
+  }
+  .score-display-num { font-size: 15vw; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; transition: transform 0.15s ease, font-size 0.25s ease; }
+  .score-display-num.pulse { animation: pulse 0.35s ease; }
+  #displayView.question-active .score-display-num { font-size: 8vw; }
+
+  /* สลับมุมมองตามโหมด: โหวต ใช่/ไม่ vs คะแนน */
+  #displayView.mode-score .vote-display-row,
+  #displayView.mode-score .split-bar,
+  #displayView.mode-score .team-total-tag,
+  #displayView.mode-score .grand-total-ribbon { display: none; }
+  #displayView.mode-score .score-display-block { display: flex; }
+  #displayView.mode-vote .score-display-block { display: none; }
 
   .divider { width: 2px; background: rgba(255,255,255,0.15); }
   .vs {
@@ -205,7 +241,7 @@
   .grand-total-ribbon b { color: var(--text); }
 
   .display-controls {
-    position: fixed; bottom: 1.5vh; right: 1.5vh; z-index: 50;
+    position: fixed; top: 1.5vh; right: 1.5vh; z-index: 50;
     display: flex; gap: 8px; opacity: 0.35; transition: opacity 0.2s ease;
   }
   .display-controls:hover, .display-controls:focus-within { opacity: 1; }
@@ -224,36 +260,34 @@
     font-size: 6vw; font-weight: 900; font-variant-numeric: tabular-nums;
     display: none;
   }
+  #displayView.question-active .timer-ribbon { font-size: 3.5vw; padding: 0.5vh 2vw; }
   .timer-ribbon.show { display: block; }
   .timer-ribbon.low { color: #f87171; }
 
-  .question-overlay {
-    position: absolute; inset: 0; z-index: 6; display: none;
-    align-items: center; justify-content: center; padding: 5vw;
-    background: rgba(5,6,10,0.92); backdrop-filter: blur(4px);
+  /* คำถามแสดงเป็นแถบด้านล่าง ไม่บังคะแนนโหวตด้านบน */
+  .question-banner {
+    flex: 0 0 auto; width: 100%; max-height: 42vh; display: none;
+    flex-direction: column; align-items: center; justify-content: center; gap: 1.4vh;
+    background: #101218; border-top: 2px solid #3b82f6; padding: 1.6vh 4vw;
+    text-align: center; overflow-y: auto;
   }
-  .question-overlay.show { display: flex; }
-  .question-box {
-    background: #12141a; border: 2px solid #3b82f6; border-radius: 24px;
-    padding: 5vw 6vw; max-width: 80vw; text-align: center;
-    display: flex; flex-direction: column; gap: 3vh;
-  }
-  .question-label { font-size: 1.8vw; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
-  .question-text { font-size: 4vw; font-weight: 800; line-height: 1.3; }
-  .answer-text { font-size: 3vw; font-weight: 700; color: #4ade80; display: none; }
+  .question-banner.show { display: flex; }
+  .question-label { font-size: 1.4vw; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+  .question-text { font-size: 2.6vw; font-weight: 800; line-height: 1.3; max-width: 90vw; }
+  .answer-text { font-size: 2vw; font-weight: 700; color: #4ade80; display: none; }
   .answer-text.show { display: block; }
-  .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5vw; margin-top: 1vh; }
+  .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1vw; margin-top: 0.4vh; width: 100%; max-width: 900px; }
   .choice-box {
-    background: #0d0f13; border: 2px solid #333; border-radius: 14px;
-    padding: 1.5vw 1.8vw; display: flex; align-items: center; gap: 1vw;
+    background: #0d0f13; border: 2px solid #333; border-radius: 12px;
+    padding: 0.8vh 1.2vw; display: flex; align-items: center; gap: 1vw;
     text-align: left; transition: all 0.3s ease;
   }
   .choice-box .choice-letter {
-    font-size: 1.8vw; font-weight: 900; color: var(--muted);
-    background: #1a1d24; border-radius: 8px; width: 2.8vw; height: 2.8vw;
+    font-size: 1.3vw; font-weight: 900; color: var(--muted);
+    background: #1a1d24; border-radius: 8px; width: 2.2vw; height: 2.2vw; min-width: 24px; min-height: 24px;
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
-  .choice-box .choice-text { font-size: 1.8vw; font-weight: 600; }
+  .choice-box .choice-text { font-size: 1.4vw; font-weight: 600; }
   .choice-box.correct-reveal { border-color: #4ade80; background: rgba(74, 222, 128, 0.12); }
   .choice-box.correct-reveal .choice-letter { background: #4ade80; color: #05060a; }
   .choice-box.correct-reveal .choice-text { color: #4ade80; }
@@ -285,36 +319,55 @@
   </div>
 
   <div class="tab-panel active" id="voteSection">
+    <div class="mode-toggle" id="modeToggle">
+      <button class="mode-btn active" data-mode="vote">🗳️ นับโหวต ใช่/ไม่</button>
+      <button class="mode-btn" data-mode="score">🏆 คะแนน</button>
+    </div>
+
     <div class="teams-grid">
       <div class="team-card a" id="cardA">
         <div class="name-row">
           <input type="color" id="colorA" value="#3b82f6" />
           <input type="text" id="nameA" class="name-input" value="ทีม A" maxlength="20" />
         </div>
-        <div class="vote-row">
-          <div class="vote-block yes">
-            <div class="vote-label">✅ ใช่</div>
-            <input type="number" class="vote-count-input" id="yesA" data-team="A" data-side="yes" value="0" inputmode="numeric" />
-            <div class="vote-btns">
-              <button class="btn-minus" data-team="A" data-side="yes" data-delta="-1">−1</button>
-              <button class="btn-plus" data-team="A" data-side="yes" data-delta="1">+1</button>
-              <button class="btn-plus5" data-team="A" data-side="yes" data-delta="5">+5</button>
+
+        <div class="mode-vote-block" id="voteBlockA">
+          <div class="vote-row">
+            <div class="vote-block yes">
+              <div class="vote-label">✅ ใช่</div>
+              <input type="number" class="vote-count-input" id="yesA" data-team="A" data-side="yes" value="0" inputmode="numeric" />
+              <div class="vote-btns">
+                <button class="btn-minus" data-team="A" data-side="yes" data-delta="-1">−1</button>
+                <button class="btn-plus" data-team="A" data-side="yes" data-delta="1">+1</button>
+                <button class="btn-plus5" data-team="A" data-side="yes" data-delta="5">+5</button>
+              </div>
+            </div>
+            <div class="vote-block no">
+              <div class="vote-label">❌ ไม่</div>
+              <input type="number" class="vote-count-input" id="noA" data-team="A" data-side="no" value="0" inputmode="numeric" />
+              <div class="vote-btns">
+                <button class="btn-minus" data-team="A" data-side="no" data-delta="-1">−1</button>
+                <button class="btn-plus" data-team="A" data-side="no" data-delta="1">+1</button>
+                <button class="btn-plus5" data-team="A" data-side="no" data-delta="5">+5</button>
+              </div>
             </div>
           </div>
-          <div class="vote-block no">
-            <div class="vote-label">❌ ไม่</div>
-            <input type="number" class="vote-count-input" id="noA" data-team="A" data-side="no" value="0" inputmode="numeric" />
-            <div class="vote-btns">
-              <button class="btn-minus" data-team="A" data-side="no" data-delta="-1">−1</button>
-              <button class="btn-plus" data-team="A" data-side="no" data-delta="1">+1</button>
-              <button class="btn-plus5" data-team="A" data-side="no" data-delta="5">+5</button>
+          <div class="team-summary">
+            <span>รวม: <b id="totalA">0</b> / <input type="number" id="targetA" class="target-input" min="0" value="350" /> คน</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="progressA" style="width:0%"></div></div>
+        </div>
+
+        <div class="mode-score-block hidden" id="scoreBlockA">
+          <div class="score-block">
+            <input type="number" class="score-count-input" id="scoreA" data-team="A" value="0" inputmode="numeric" />
+            <div class="score-btns">
+              <button class="btn-minus" data-scoreteam="A" data-delta="-1">−1</button>
+              <button class="btn-plus-score" data-scoreteam="A" data-delta="1">+1</button>
+              <button class="btn-plus5" data-scoreteam="A" data-delta="5">+5</button>
             </div>
           </div>
         </div>
-        <div class="team-summary">
-          <span>รวม: <b id="totalA">0</b> / <input type="number" id="targetA" class="target-input" min="0" value="350" /> คน</span>
-        </div>
-        <div class="progress-track"><div class="progress-fill" id="progressA" style="width:0%"></div></div>
       </div>
 
       <div class="team-card b" id="cardB">
@@ -322,37 +375,52 @@
           <input type="color" id="colorB" value="#f59e0b" />
           <input type="text" id="nameB" class="name-input" value="ทีม B" maxlength="20" />
         </div>
-        <div class="vote-row">
-          <div class="vote-block yes">
-            <div class="vote-label">✅ ใช่</div>
-            <input type="number" class="vote-count-input" id="yesB" data-team="B" data-side="yes" value="0" inputmode="numeric" />
-            <div class="vote-btns">
-              <button class="btn-minus" data-team="B" data-side="yes" data-delta="-1">−1</button>
-              <button class="btn-plus" data-team="B" data-side="yes" data-delta="1">+1</button>
-              <button class="btn-plus5" data-team="B" data-side="yes" data-delta="5">+5</button>
+
+        <div class="mode-vote-block" id="voteBlockB">
+          <div class="vote-row">
+            <div class="vote-block yes">
+              <div class="vote-label">✅ ใช่</div>
+              <input type="number" class="vote-count-input" id="yesB" data-team="B" data-side="yes" value="0" inputmode="numeric" />
+              <div class="vote-btns">
+                <button class="btn-minus" data-team="B" data-side="yes" data-delta="-1">−1</button>
+                <button class="btn-plus" data-team="B" data-side="yes" data-delta="1">+1</button>
+                <button class="btn-plus5" data-team="B" data-side="yes" data-delta="5">+5</button>
+              </div>
+            </div>
+            <div class="vote-block no">
+              <div class="vote-label">❌ ไม่</div>
+              <input type="number" class="vote-count-input" id="noB" data-team="B" data-side="no" value="0" inputmode="numeric" />
+              <div class="vote-btns">
+                <button class="btn-minus" data-team="B" data-side="no" data-delta="-1">−1</button>
+                <button class="btn-plus" data-team="B" data-side="no" data-delta="1">+1</button>
+                <button class="btn-plus5" data-team="B" data-side="no" data-delta="5">+5</button>
+              </div>
             </div>
           </div>
-          <div class="vote-block no">
-            <div class="vote-label">❌ ไม่</div>
-            <input type="number" class="vote-count-input" id="noB" data-team="B" data-side="no" value="0" inputmode="numeric" />
-            <div class="vote-btns">
-              <button class="btn-minus" data-team="B" data-side="no" data-delta="-1">−1</button>
-              <button class="btn-plus" data-team="B" data-side="no" data-delta="1">+1</button>
-              <button class="btn-plus5" data-team="B" data-side="no" data-delta="5">+5</button>
+          <div class="team-summary">
+            <span>รวม: <b id="totalB">0</b> / <input type="number" id="targetB" class="target-input" min="0" value="350" /> คน</span>
+          </div>
+          <div class="progress-track"><div class="progress-fill" id="progressB" style="width:0%"></div></div>
+        </div>
+
+        <div class="mode-score-block hidden" id="scoreBlockB">
+          <div class="score-block">
+            <input type="number" class="score-count-input" id="scoreB" data-team="B" value="0" inputmode="numeric" />
+            <div class="score-btns">
+              <button class="btn-minus" data-scoreteam="B" data-delta="-1">−1</button>
+              <button class="btn-plus-score" data-scoreteam="B" data-delta="1">+1</button>
+              <button class="btn-plus5" data-scoreteam="B" data-delta="5">+5</button>
             </div>
           </div>
         </div>
-        <div class="team-summary">
-          <span>รวม: <b id="totalB">0</b> / <input type="number" id="targetB" class="target-input" min="0" value="350" /> คน</span>
-        </div>
-        <div class="progress-track"><div class="progress-fill" id="progressB" style="width:0%"></div></div>
       </div>
     </div>
 
-    <div class="grand-total">รวมทั้งหมดที่นับแล้ว: <b id="grandTotal">0</b> / <span id="grandTarget">700</span> คน</div>
+    <div class="grand-total" id="voteGrandTotalLine">รวมทั้งหมดที่นับแล้ว: <b id="grandTotal">0</b> / <span id="grandTarget">700</span> คน</div>
 
     <div class="global-actions">
       <button class="btn-reset" id="resetBtn">รีเซ็ตยอดโหวต</button>
+      <button class="btn-reset hidden" id="resetScoreBtn">รีเซ็ตคะแนน</button>
     </div>
   </div>
 
@@ -433,6 +501,10 @@
       </div>
       <div class="split-bar"><div class="split-bar-yes" id="splitYesA" style="width:50%"></div><div class="split-bar-no" id="splitNoA" style="width:50%"></div></div>
       <div class="team-total-tag">รวม <span id="dispTotalA">0</span> / <span id="dispTargetA">350</span> คน</div>
+      <div class="score-display-block">
+        <div class="score-display-label">คะแนน</div>
+        <div class="score-display-num" id="dispScoreA">0</div>
+      </div>
     </div>
     <div class="divider"></div>
     <div class="team b" id="teamB">
@@ -449,6 +521,10 @@
       </div>
       <div class="split-bar"><div class="split-bar-yes" id="splitYesB" style="width:50%"></div><div class="split-bar-no" id="splitNoB" style="width:50%"></div></div>
       <div class="team-total-tag">รวม <span id="dispTotalB">0</span> / <span id="dispTargetB">350</span> คน</div>
+      <div class="score-display-block">
+        <div class="score-display-label">คะแนน</div>
+        <div class="score-display-num" id="dispScoreB">0</div>
+      </div>
     </div>
     <div class="vs">VS</div>
   </div>
@@ -456,13 +532,11 @@
 
   <div class="timer-ribbon" id="timerRibbon">01:00</div>
 
-  <div class="question-overlay" id="questionOverlay">
-    <div class="question-box">
-      <div class="question-label">คำถาม</div>
-      <div class="question-text" id="dispQText"></div>
-      <div class="choices-grid hidden" id="dispChoicesGrid"></div>
-      <div class="answer-text" id="dispAText"></div>
-    </div>
+  <div class="question-banner" id="questionBanner">
+    <div class="question-label">คำถาม</div>
+    <div class="question-text" id="dispQText"></div>
+    <div class="choices-grid hidden" id="dispChoicesGrid"></div>
+    <div class="answer-text" id="dispAText"></div>
   </div>
 </div>
 
@@ -489,7 +563,9 @@
   const DEFAULT_STATE = {
     voteNameA: "ทีม A", voteNameB: "ทีม B",
     voteColorA: "#3b82f6", voteColorB: "#f59e0b",
+    voteBoardMode: "vote",
     yesA: 0, noA: 0, yesB: 0, noB: 0,
+    voteScoreA: 0, voteScoreB: 0,
     targetA: 350, targetB: 350,
     voteTimerDuration: 60,
     voteTimerRemaining: 60,
@@ -577,10 +653,15 @@
       nameA: document.getElementById("nameA"), nameB: document.getElementById("nameB"),
       yesA: document.getElementById("yesA"), noA: document.getElementById("noA"),
       yesB: document.getElementById("yesB"), noB: document.getElementById("noB"),
+      scoreA: document.getElementById("scoreA"), scoreB: document.getElementById("scoreB"),
       totalA: document.getElementById("totalA"), totalB: document.getElementById("totalB"),
       targetA: document.getElementById("targetA"), targetB: document.getElementById("targetB"),
       progressA: document.getElementById("progressA"), progressB: document.getElementById("progressB"),
       grandTotal: document.getElementById("grandTotal"), grandTarget: document.getElementById("grandTarget"),
+      voteGrandTotalLine: document.getElementById("voteGrandTotalLine"),
+      voteBlockA: document.getElementById("voteBlockA"), voteBlockB: document.getElementById("voteBlockB"),
+      scoreBlockA: document.getElementById("scoreBlockA"), scoreBlockB: document.getElementById("scoreBlockB"),
+      resetBtn: document.getElementById("resetBtn"), resetScoreBtn: document.getElementById("resetScoreBtn"),
       timerMin: document.getElementById("timerMin"), timerSec: document.getElementById("timerSec"),
       timerMiniDisplay: document.getElementById("timerMiniDisplay"),
       qList: document.getElementById("qList"),
@@ -598,6 +679,24 @@
         document.getElementById(btn.dataset.tab).classList.add("active");
       });
     });
+
+    // ---- โหมด: นับโหวต / คะแนน ----
+    document.querySelectorAll(".mode-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        updateDoc(voteRef, { voteBoardMode: btn.dataset.mode }).catch(console.error);
+      });
+    });
+    function applyBoardMode(boardMode) {
+      const isScore = boardMode === "score";
+      document.querySelectorAll(".mode-btn").forEach((b) => b.classList.toggle("active", b.dataset.mode === boardMode));
+      els.voteBlockA.classList.toggle("hidden", isScore);
+      els.voteBlockB.classList.toggle("hidden", isScore);
+      els.scoreBlockA.classList.toggle("hidden", !isScore);
+      els.scoreBlockB.classList.toggle("hidden", !isScore);
+      els.voteGrandTotalLine.classList.toggle("hidden", isScore);
+      els.resetBtn.classList.toggle("hidden", isScore);
+      els.resetScoreBtn.classList.toggle("hidden", !isScore);
+    }
 
     let isTypingName = false;
     let isTypingTarget = false;
@@ -628,11 +727,16 @@
       const yesA = data.yesA ?? 0, noA = data.noA ?? 0;
       const yesB = data.yesB ?? 0, noB = data.noB ?? 0;
       const targetA = data.targetA ?? 350, targetB = data.targetB ?? 350;
+      const scoreA = data.voteScoreA ?? 0, scoreB = data.voteScoreB ?? 0;
 
       if (!editingCounts.has(els.yesA)) els.yesA.value = yesA;
       if (!editingCounts.has(els.noA)) els.noA.value = noA;
       if (!editingCounts.has(els.yesB)) els.yesB.value = yesB;
       if (!editingCounts.has(els.noB)) els.noB.value = noB;
+      if (!editingCounts.has(els.scoreA)) els.scoreA.value = scoreA;
+      if (!editingCounts.has(els.scoreB)) els.scoreB.value = scoreB;
+
+      applyBoardMode(data.voteBoardMode || "vote");
 
       els.totalA.textContent = yesA + noA;
       els.totalB.textContent = yesB + noB;
@@ -671,7 +775,7 @@
       return (side === "yes" ? "yes" : "no") + team;
     }
 
-    // +1 / -1 / +5 buttons
+    // +1 / -1 / +5 buttons (โหมดโหวต)
     document.querySelectorAll("[data-team][data-side][data-delta]").forEach((btn) => {
       btn.addEventListener("click", () => {
         const team = btn.dataset.team;
@@ -684,6 +788,16 @@
           statusText.classList.add("error");
           console.error(err);
         });
+      });
+    });
+
+    // −1 / +1 / +5 buttons (โหมดคะแนน)
+    document.querySelectorAll("[data-scoreteam][data-delta]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const field = "voteScore" + btn.dataset.scoreteam;
+        const delta = parseInt(btn.dataset.delta, 10);
+        playTickSound(delta > 0);
+        updateDoc(voteRef, { [field]: increment(delta) }).catch(console.error);
       });
     });
 
@@ -702,9 +816,30 @@
       input.addEventListener("keydown", (e) => { if (e.key === "Enter") { input.blur(); } });
     });
 
+    // แก้ไขคะแนนได้โดยตรง
+    [els.scoreA, els.scoreB].forEach((input) => {
+      input.addEventListener("focus", () => editingCounts.add(input));
+      function commit() {
+        editingCounts.delete(input);
+        const field = "voteScore" + input.dataset.team;
+        let val = parseInt(input.value, 10);
+        if (isNaN(val)) val = 0;
+        input.value = val;
+        updateDoc(voteRef, { [field]: val }).catch(console.error);
+      }
+      input.addEventListener("blur", commit);
+      input.addEventListener("keydown", (e) => { if (e.key === "Enter") { input.blur(); } });
+    });
+
     document.getElementById("resetBtn").addEventListener("click", () => {
       if (confirm("ยืนยันรีเซ็ตยอดโหวตทั้งหมดของทั้งสองทีมเป็น 0 ?")) {
         updateDoc(voteRef, { yesA: 0, noA: 0, yesB: 0, noB: 0 }).catch(console.error);
+      }
+    });
+
+    document.getElementById("resetScoreBtn").addEventListener("click", () => {
+      if (confirm("ยืนยันรีเซ็ตคะแนนทั้งสองทีมเป็น 0 ?")) {
+        updateDoc(voteRef, { voteScoreA: 0, voteScoreB: 0 }).catch(console.error);
       }
     });
 
@@ -964,8 +1099,9 @@
       splitYesA: document.getElementById("splitYesA"), splitNoA: document.getElementById("splitNoA"),
       splitYesB: document.getElementById("splitYesB"), splitNoB: document.getElementById("splitNoB"),
       grandTotal: document.getElementById("dispGrandTotal"), grandTarget: document.getElementById("dispGrandTarget"),
+      scoreA: document.getElementById("dispScoreA"), scoreB: document.getElementById("dispScoreB"),
       timerRibbon: document.getElementById("timerRibbon"),
-      questionOverlay: document.getElementById("questionOverlay"),
+      questionBanner: document.getElementById("questionBanner"),
       dispQText: document.getElementById("dispQText"),
       dispAText: document.getElementById("dispAText"),
       dispChoicesGrid: document.getElementById("dispChoicesGrid"),
@@ -973,6 +1109,7 @@
     const LETTERS = ["ก", "ข", "ค", "ง", "จ", "ฉ", "ช", "ซ"];
 
     let prevYesA = null, prevNoA = null, prevYesB = null, prevNoB = null;
+    let prevScoreA = null, prevScoreB = null;
     let prevShowAnswer = false;
     let latestData = null;
     let buzzerPlayedForThisRun = false;
@@ -1019,6 +1156,11 @@
       const yesA = data.yesA ?? 0, noA = data.noA ?? 0;
       const yesB = data.yesB ?? 0, noB = data.noB ?? 0;
       const targetA = data.targetA ?? 350, targetB = data.targetB ?? 350;
+      const scoreA = data.voteScoreA ?? 0, scoreB = data.voteScoreB ?? 0;
+      const boardMode = data.voteBoardMode || "vote";
+
+      displayEl.classList.toggle("mode-score", boardMode === "score");
+      displayEl.classList.toggle("mode-vote", boardMode !== "score");
 
       els.nameA.textContent = data.voteNameA || "ทีม A";
       els.nameB.textContent = data.voteNameB || "ทีม B";
@@ -1037,18 +1179,24 @@
       els.grandTarget.textContent = targetA + targetB;
       setSplit(els.splitYesA, els.splitNoA, yesA, noA);
       setSplit(els.splitYesB, els.splitNoB, yesB, noB);
+      els.scoreA.textContent = scoreA;
+      els.scoreB.textContent = scoreB;
 
       if (prevYesA !== null && yesA !== prevYesA) pulse(els.yesA);
       if (prevNoA !== null && noA !== prevNoA) pulse(els.noA);
       if (prevYesB !== null && yesB !== prevYesB) pulse(els.yesB);
       if (prevNoB !== null && noB !== prevNoB) pulse(els.noB);
+      if (prevScoreA !== null && scoreA !== prevScoreA) pulse(els.scoreA);
+      if (prevScoreB !== null && scoreB !== prevScoreB) pulse(els.scoreB);
       prevYesA = yesA; prevNoA = noA; prevYesB = yesB; prevNoB = noB;
+      prevScoreA = scoreA; prevScoreB = scoreB;
 
       const questions = data.voteQuestions || [];
       const idx = data.voteCurrentQIndex ?? -1;
       if (data.voteQuestionVisible && idx >= 0 && questions[idx]) {
         const item = questions[idx];
-        els.questionOverlay.classList.add("show");
+        els.questionBanner.classList.add("show");
+        displayEl.classList.add("question-active");
         els.dispQText.textContent = item.q;
 
         if (item.choices && item.choices.some((c) => c)) {
@@ -1075,7 +1223,8 @@
         }
         prevShowAnswer = data.voteShowAnswer;
       } else {
-        els.questionOverlay.classList.remove("show");
+        els.questionBanner.classList.remove("show");
+        displayEl.classList.remove("question-active");
         els.dispChoicesGrid.classList.add("hidden");
         prevShowAnswer = false;
       }
