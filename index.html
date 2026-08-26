@@ -104,6 +104,7 @@
   .global-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
   .btn-reset { background: #26292f; color: #f87171; padding: 12px 18px; font-size: 13px; }
   .btn-home { background: #26292f; color: var(--muted); padding: 12px 18px; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; }
+  .persistent-actions { display: flex; justify-content: center; padding-top: 4px; }
 
   .grand-total { text-align: center; font-size: 13px; color: var(--muted); }
   .grand-total b { color: var(--text); font-size: 15px; }
@@ -153,10 +154,7 @@
   .choice-inputs .choice-letter { width: 22px; font-weight: 700; color: var(--muted); font-size: 14px; flex-shrink: 0; }
   .choice-inputs input[type="text"] { flex: 1; background: #000; border: 1px solid #333; color: var(--text); font-size: 14px; padding: 8px 10px; border-radius: 10px; }
   .choice-inputs input[type="radio"] { width: 18px; height: 18px; flex-shrink: 0; }
-  .btn-remove-choice { background: #26292f; color: #f87171; width: 32px; height: 32px; font-size: 15px; flex-shrink: 0; padding: 0; }
-  .choice-add-row { display: flex; justify-content: space-between; align-items: center; }
-  .btn-add-choice { background: #26292f; color: var(--text); padding: 8px 12px; font-size: 12px; }
-  .choice-max-note { font-size: 11px; color: var(--muted); }
+  .choice-inputs .btn-remove-choice { flex-shrink: 0; width: 30px; height: 30px; padding: 0; background: #26292f; color: #f87171; font-size: 16px; line-height: 1; border-radius: 8px; }
   .active-choices { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
   .active-choice-item { background: #16181e; border: 1px solid #26292f; border-radius: 10px; padding: 8px 10px; font-size: 13px; }
   .active-choice-item.correct-reveal { border-color: #4ade80; color: #4ade80; }
@@ -206,18 +204,18 @@
   }
   .grand-total-ribbon b { color: var(--text); }
 
-  .live-score-ribbon {
-    position: absolute; top: 0; right: 0; display: none; gap: 1.4vw;
-    background: #05060a; border: 1px solid rgba(255,255,255,0.15); border-right: none; border-top: none;
-    border-radius: 0 0 0 18px; padding: 0.8vh 1.6vw; z-index: 7;
-    font-size: 1.2vw; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums;
+  .display-controls {
+    position: fixed; bottom: 1.5vh; right: 1.5vh; z-index: 50;
+    display: flex; gap: 8px; opacity: 0.35; transition: opacity 0.2s ease;
   }
-  .live-score-ribbon.show { display: flex; }
-  .live-score-ribbon .lsr-team { display: flex; align-items: center; gap: 0.5vw; white-space: nowrap; }
-  .live-score-ribbon .lsr-name { color: var(--text); }
-  .live-score-ribbon .lsr-yes { color: var(--yes); }
-  .live-score-ribbon .lsr-no { color: var(--no); }
-  .live-score-ribbon .lsr-sep { color: rgba(255,255,255,0.2); }
+  .display-controls:hover, .display-controls:focus-within { opacity: 1; }
+  .disp-ctrl-btn {
+    width: 44px; height: 44px; border-radius: 50%; background: rgba(10,10,14,0.75);
+    border: 1px solid rgba(255,255,255,0.2); color: var(--text); font-size: 18px;
+    display: flex; align-items: center; justify-content: center; text-decoration: none;
+    cursor: pointer;
+  }
+  .disp-ctrl-btn:active { filter: brightness(1.3); }
 
   .timer-ribbon {
     position: absolute; top: 0; left: 50%; transform: translateX(-50%);
@@ -354,7 +352,6 @@
     <div class="grand-total">รวมทั้งหมดที่นับแล้ว: <b id="grandTotal">0</b> / <span id="grandTarget">700</span> คน</div>
 
     <div class="global-actions">
-      <a class="btn-home" href="?">← กลับหน้าแรก</a>
       <button class="btn-reset" id="resetBtn">รีเซ็ตยอดโหวต</button>
     </div>
   </div>
@@ -396,10 +393,10 @@
 
       <div class="q-add-row">
         <input type="text" id="newQ" placeholder="พิมพ์คำถาม..." maxlength="200" />
-        <div class="choice-inputs" id="choiceInputs"></div>
-        <div class="choice-add-row">
-          <button type="button" class="btn-add-choice" id="addChoiceBtn">+ เพิ่มตัวเลือก</button>
-          <span class="choice-max-note">ติ๊กวงกลมหน้าข้อที่ถูก (เว้นว่างตัวเลือกได้ถ้าไม่ใช้แบบเลือกตอบ)</span>
+        <div class="choice-inputs" id="choiceRows"></div>
+        <div style="display:flex; gap:8px;">
+          <button class="timer-preset-btn" id="addChoiceBtn" type="button">+ เพิ่มตัวเลือก</button>
+          <span style="font-size:12px;color:var(--muted); align-self:center;">ติ๊กวงกลมหน้าข้อที่ถูก • ลบทุกช่องได้ถ้าไม่ใช้แบบเลือกตอบ</span>
         </div>
         <input type="text" id="newA" placeholder="พิมพ์เฉลย / คำอธิบายเพิ่มเติม..." maxlength="200" />
         <button class="btn-add-q" id="addQBtn">+ เพิ่มคำถาม</button>
@@ -410,9 +407,17 @@
       </div>
     </div>
   </div>
+
+  <div class="persistent-actions">
+    <a class="btn-home" href="?">← กลับหน้าแรก</a>
+  </div>
 </div>
 
 <div id="displayView">
+  <div class="display-controls">
+    <button class="disp-ctrl-btn" id="fullscreenBtn" title="ขยายเต็มจอ">⛶</button>
+    <a class="disp-ctrl-btn" id="homeBtnDisplay" href="?" title="กลับหน้าแรก">🏠</a>
+  </div>
   <div class="board" id="board" style="--ca:#3b82f6; --cb:#f59e0b;">
     <div class="team a" id="teamA">
       <div class="team-name" id="dispNameA">ทีม A</div>
@@ -448,19 +453,6 @@
     <div class="vs">VS</div>
   </div>
   <div class="grand-total-ribbon">นับแล้ว <b id="dispGrandTotal">0</b> / <span id="dispGrandTarget">700</span> คน</div>
-  <div class="live-score-ribbon" id="liveScoreRibbon">
-    <span class="lsr-team a">
-      <span class="lsr-name" id="lsrNameA">ทีม A</span>
-      ✅<span class="lsr-yes" id="lsrYesA">0</span>
-      ❌<span class="lsr-no" id="lsrNoA">0</span>
-    </span>
-    <span class="lsr-sep">|</span>
-    <span class="lsr-team b">
-      <span class="lsr-name" id="lsrNameB">ทีม B</span>
-      ✅<span class="lsr-yes" id="lsrYesB">0</span>
-      ❌<span class="lsr-no" id="lsrNoB">0</span>
-    </span>
-  </div>
 
   <div class="timer-ribbon" id="timerRibbon">01:00</div>
 
@@ -508,10 +500,6 @@
     voteQuestionVisible: false,
     voteShowAnswer: false,
   };
-
-  const THAI_LETTERS = ["ก", "ข", "ค", "ง", "จ", "ฉ", "ช", "ซ", "ฌ", "ญ"];
-  const MAX_CHOICES = THAI_LETTERS.length;
-  const MIN_CHOICES = 0;
 
   const params = new URLSearchParams(window.location.search);
   const mode = params.get("mode");
@@ -807,7 +795,7 @@
     function renderQuestions(data) {
       const questions = data.voteQuestions || [];
       const idx = data.voteCurrentQIndex ?? -1;
-      const LETTERS = THAI_LETTERS;
+      const LETTERS = ["ก", "ข", "ค", "ง", "จ", "ฉ", "ช", "ซ"];
 
       if (data.voteQuestionVisible && idx >= 0 && questions[idx]) {
         const item = questions[idx];
@@ -876,81 +864,82 @@
       });
     }
 
-    // ---- Dynamic answer-choice rows (เพิ่ม/ลบ ตัวเลือกคำตอบ) ----
-    const choiceInputsEl = document.getElementById("choiceInputs");
-    const addChoiceBtn = document.getElementById("addChoiceBtn");
-    const DEFAULT_CHOICE_COUNT = 4;
+    // ---- Dynamic choice rows for new question ----
+    const QLETTERS = ["ก", "ข", "ค", "ง", "จ", "ฉ", "ช", "ซ"];
+    const MAX_CHOICES = 8;
+    let newQChoices = ["", "", "", ""];
+    let newQCorrectIndex = 0;
+    const choiceRowsEl = document.getElementById("choiceRows");
 
-    function relabelChoiceRows() {
-      const rows = choiceInputsEl.querySelectorAll(".choice-row");
-      rows.forEach((row, i) => {
-        row.dataset.idx = i;
-        row.querySelector(".choice-letter").textContent = THAI_LETTERS[i];
-        row.querySelector('input[type="radio"]').value = i;
-        row.querySelector(".btn-remove-choice").dataset.idx = i;
-      });
-      addChoiceBtn.disabled = rows.length >= MAX_CHOICES;
-      addChoiceBtn.style.opacity = rows.length >= MAX_CHOICES ? "0.4" : "1";
+    function renderChoiceRows() {
+      const focusedIdx = choiceRowsEl.querySelector("input[type=text]:focus")
+        ? Array.from(choiceRowsEl.querySelectorAll("input[type=text]")).findIndex((el) => el === document.activeElement)
+        : -1;
+      choiceRowsEl.innerHTML = newQChoices.map((val, i) => `
+        <div class="choice-row">
+          <input type="radio" name="correctChoice" value="${i}" ${i === newQCorrectIndex ? "checked" : ""} data-role="radio" data-idx="${i}" />
+          <span class="choice-letter">${QLETTERS[i] || i + 1}</span>
+          <input type="text" data-role="text" data-idx="${i}" placeholder="ตัวเลือก ${QLETTERS[i] || i + 1}" maxlength="100" value="${escapeHtml(val)}" />
+          <button type="button" class="btn-remove-choice" data-role="remove" data-idx="${i}">✕</button>
+        </div>
+      `).join("");
+      if (focusedIdx >= 0 && choiceRowsEl.querySelectorAll("input[type=text]")[focusedIdx]) {
+        const el = choiceRowsEl.querySelectorAll("input[type=text]")[focusedIdx];
+        el.focus();
+        el.setSelectionRange(el.value.length, el.value.length);
+      }
     }
 
-    function addChoiceRow(checked) {
-      const rows = choiceInputsEl.querySelectorAll(".choice-row");
-      if (rows.length >= MAX_CHOICES) return;
-      const i = rows.length;
-      const row = document.createElement("div");
-      row.className = "choice-row";
-      row.dataset.idx = i;
-      row.innerHTML = `
-        <input type="radio" name="correctChoice" value="${i}" ${checked ? "checked" : ""} />
-        <span class="choice-letter">${THAI_LETTERS[i]}</span>
-        <input type="text" class="choice-text-input" placeholder="ตัวเลือก ${THAI_LETTERS[i]}" maxlength="100" />
-        <button type="button" class="btn-remove-choice" data-idx="${i}">✕</button>
-      `;
-      row.querySelector(".btn-remove-choice").addEventListener("click", () => {
-        const wasChecked = row.querySelector('input[type="radio"]').checked;
-        row.remove();
-        relabelChoiceRows();
-        if (wasChecked) {
-          const firstRadio = choiceInputsEl.querySelector('input[type="radio"]');
-          if (firstRadio) firstRadio.checked = true;
-        }
-      });
-      choiceInputsEl.appendChild(row);
-      relabelChoiceRows();
-    }
-
-    function resetChoiceRows(count) {
-      choiceInputsEl.innerHTML = "";
-      for (let i = 0; i < count; i++) addChoiceRow(i === 0);
-    }
-
-    addChoiceBtn.addEventListener("click", () => addChoiceRow(false));
-    resetChoiceRows(DEFAULT_CHOICE_COUNT);
+    choiceRowsEl.addEventListener("input", (e) => {
+      if (e.target.dataset.role === "text") {
+        newQChoices[parseInt(e.target.dataset.idx, 10)] = e.target.value;
+      }
+    });
+    choiceRowsEl.addEventListener("change", (e) => {
+      if (e.target.dataset.role === "radio") {
+        newQCorrectIndex = parseInt(e.target.dataset.idx, 10);
+      }
+    });
+    choiceRowsEl.addEventListener("click", (e) => {
+      if (e.target.dataset.role === "remove") {
+        const idx = parseInt(e.target.dataset.idx, 10);
+        newQChoices.splice(idx, 1);
+        if (newQCorrectIndex >= newQChoices.length) newQCorrectIndex = Math.max(0, newQChoices.length - 1);
+        else if (newQCorrectIndex > idx) newQCorrectIndex -= 1;
+        renderChoiceRows();
+      }
+    });
+    document.getElementById("addChoiceBtn").addEventListener("click", () => {
+      if (newQChoices.length >= MAX_CHOICES) { alert("เพิ่มได้สูงสุด " + MAX_CHOICES + " ตัวเลือก"); return; }
+      newQChoices.push("");
+      renderChoiceRows();
+    });
+    renderChoiceRows();
 
     document.getElementById("addQBtn").addEventListener("click", () => {
       const qInput = document.getElementById("newQ");
       const aInput = document.getElementById("newA");
       const q = qInput.value.trim();
       const a = aInput.value.trim();
-      const rawChoices = Array.from(choiceInputsEl.querySelectorAll(".choice-text-input")).map((el) => el.value.trim());
+      const rawChoices = newQChoices.map((c) => c.trim());
       const hasChoices = rawChoices.some((c) => c !== "");
       if (!q) { alert("กรอกคำถามด้วย"); return; }
       if (!hasChoices && !a) { alert("กรอกเฉลย หรือกรอกตัวเลือกอย่างน้อย 1 ช่อง"); return; }
 
       const newItem = { q, a };
       if (hasChoices) {
-        const checkedRadio = choiceInputsEl.querySelector('input[name="correctChoice"]:checked');
-        const correctIndex = checkedRadio ? parseInt(checkedRadio.value, 10) : 0;
         newItem.choices = rawChoices;
-        newItem.correctIndex = correctIndex;
-        if (!a) newItem.a = rawChoices[correctIndex] || "";
+        newItem.correctIndex = newQCorrectIndex;
+        if (!a) newItem.a = rawChoices[newQCorrectIndex] || "";
       }
 
       const existing = (latestData && latestData.voteQuestions) || [];
       updateDoc(voteRef, { voteQuestions: [...existing, newItem] }).catch(console.error);
       qInput.value = "";
       aInput.value = "";
-      resetChoiceRows(DEFAULT_CHOICE_COUNT);
+      newQChoices = ["", "", "", ""];
+      newQCorrectIndex = 0;
+      renderChoiceRows();
     });
 
     document.getElementById("revealBtn").addEventListener("click", () => {
@@ -980,12 +969,8 @@
       dispQText: document.getElementById("dispQText"),
       dispAText: document.getElementById("dispAText"),
       dispChoicesGrid: document.getElementById("dispChoicesGrid"),
-      liveScoreRibbon: document.getElementById("liveScoreRibbon"),
-      lsrNameA: document.getElementById("lsrNameA"), lsrNameB: document.getElementById("lsrNameB"),
-      lsrYesA: document.getElementById("lsrYesA"), lsrNoA: document.getElementById("lsrNoA"),
-      lsrYesB: document.getElementById("lsrYesB"), lsrNoB: document.getElementById("lsrNoB"),
     };
-    const LETTERS = THAI_LETTERS;
+    const LETTERS = ["ก", "ข", "ค", "ง", "จ", "ฉ", "ช", "ซ"];
 
     let prevYesA = null, prevNoA = null, prevYesB = null, prevNoB = null;
     let prevShowAnswer = false;
@@ -995,6 +980,22 @@
     function tryUnlockAudio() { ensureAudio(); document.removeEventListener("click", tryUnlockAudio); document.removeEventListener("touchstart", tryUnlockAudio); }
     document.addEventListener("click", tryUnlockAudio);
     document.addEventListener("touchstart", tryUnlockAudio);
+
+    // ---- ปุ่มขยายเต็มจอ ----
+    const fullscreenBtn = document.getElementById("fullscreenBtn");
+    function updateFullscreenBtn() {
+      fullscreenBtn.textContent = document.fullscreenElement ? "⤢" : "⛶";
+      fullscreenBtn.title = document.fullscreenElement ? "ย่อจอ" : "ขยายเต็มจอ";
+    }
+    fullscreenBtn.addEventListener("click", () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    });
+    document.addEventListener("fullscreenchange", updateFullscreenBtn);
+    updateFullscreenBtn();
 
     function pulse(el) {
       el.classList.remove("pulse");
@@ -1024,13 +1025,6 @@
       els.board.style.setProperty("--ca", data.voteColorA || "#3b82f6");
       els.board.style.setProperty("--cb", data.voteColorB || "#f59e0b");
 
-      els.lsrNameA.textContent = data.voteNameA || "ทีม A";
-      els.lsrNameB.textContent = data.voteNameB || "ทีม B";
-      els.lsrYesA.textContent = yesA;
-      els.lsrNoA.textContent = noA;
-      els.lsrYesB.textContent = yesB;
-      els.lsrNoB.textContent = noB;
-
       els.yesA.textContent = yesA;
       els.noA.textContent = noA;
       els.yesB.textContent = yesB;
@@ -1055,7 +1049,6 @@
       if (data.voteQuestionVisible && idx >= 0 && questions[idx]) {
         const item = questions[idx];
         els.questionOverlay.classList.add("show");
-        els.liveScoreRibbon.classList.add("show");
         els.dispQText.textContent = item.q;
 
         if (item.choices && item.choices.some((c) => c)) {
@@ -1083,7 +1076,6 @@
         prevShowAnswer = data.voteShowAnswer;
       } else {
         els.questionOverlay.classList.remove("show");
-        els.liveScoreRibbon.classList.remove("show");
         els.dispChoicesGrid.classList.add("hidden");
         prevShowAnswer = false;
       }
