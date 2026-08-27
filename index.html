@@ -48,8 +48,8 @@
     .x1-timerbox span.warning{color:var(--red);animation:blink 1s infinite}
     .x1-arena{position:relative;flex:1;min-height:0}
     .x1-side{position:absolute;top:0;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(10px,1.6vw,16px);padding:clamp(70px,12vw,110px) clamp(18px,5vw,54px) clamp(18px,4vw,40px);color:#fff;text-align:center}
-    .x1-side-a{left:0;width:56%;background:linear-gradient(160deg,#4d89ee 0%,#173f95 100%);clip-path:polygon(0 0,100% 0,88% 100%,0 100%);z-index:1}
-    .x1-side-b{left:44%;width:56%;background:linear-gradient(160deg,#eeae42 0%,#a3670f 100%);clip-path:polygon(14% 0,100% 0,100% 100%,0 100%);z-index:2}
+    .x1-side-a{left:0;width:56%;background:linear-gradient(160deg,color-mix(in srgb,var(--team-color,#2b6fef),white 22%) 0%,color-mix(in srgb,var(--team-color,#2b6fef),black 58%) 100%);clip-path:polygon(0 0,100% 0,88% 100%,0 100%);z-index:1}
+    .x1-side-b{left:44%;width:56%;background:linear-gradient(160deg,color-mix(in srgb,var(--team-color,#eeae42),white 22%) 0%,color-mix(in srgb,var(--team-color,#eeae42),black 58%) 100%);clip-path:polygon(14% 0,100% 0,100% 100%,0 100%);z-index:2}
     .x1-side h2{font-size:clamp(1.5rem,3.6vw,3rem);font-weight:900;margin:0}
     .x1-pills{display:flex;gap:10px}
     .x1-pill{padding:.3rem 1.1rem;border-radius:999px;font-weight:800;font-size:clamp(.8rem,1.5vw,1rem)}
@@ -143,7 +143,7 @@
       </div>
       <div class="x1-timerbox"><span id="x1TimerValue">01:00</span></div>
       <div class="x1-arena">
-        <article id="x1TeamA" class="x1-side x1-side-a">
+        <article id="x1TeamA" class="x1-side x1-side-a" style="--team-color:var(--red)">
           <h2 id="x1NameA">ทีม A</h2>
           <div class="x1-pills"><span class="x1-pill x1-pill-yes" id="x1PillYesA">ใช่</span><span class="x1-pill x1-pill-no" id="x1PillNoA">ไม่</span></div>
           <div class="x1-numbers"><span id="x1YesA">0</span><span id="x1NoA">0</span></div>
@@ -151,7 +151,7 @@
           <div class="x1-total" id="x1TotalLineA">รวม <b id="x1TotalA">0</b> / <span id="x1TargetA">350</span> คน</div>
         </article>
         <div class="x1-vs">VS</div>
-        <article id="x1TeamB" class="x1-side x1-side-b">
+        <article id="x1TeamB" class="x1-side x1-side-b" style="--team-color:var(--blue)">
           <h2 id="x1NameB">ทีม B</h2>
           <div class="x1-pills"><span class="x1-pill x1-pill-yes" id="x1PillYesB">ใช่</span><span class="x1-pill x1-pill-no" id="x1PillNoB">ไม่</span></div>
           <div class="x1-numbers"><span id="x1YesB">0</span><span id="x1NoB">0</span></div>
@@ -280,6 +280,7 @@
       [["A",a],["B",b]].forEach(([key,team])=>{
         const t=total(team); const target=Math.max(0,number(team.target,0));
         setText("x1Name"+key,team.name);
+        $("x1Team"+key)?.style.setProperty("--team-color", team.color);
         const pillYes=$("x1PillYes"+key), pillNo=$("x1PillNo"+key), noEl=$("x1No"+key), noNum=noEl?.parentElement;
         const barYes=$("x1BarYes"+key), barNo=$("x1BarNo"+key), line=$("x1TotalLine"+key);
         if(isScore){
