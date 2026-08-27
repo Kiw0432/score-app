@@ -1,1276 +1,358 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>โหวต ใช่ / ไม่ — 2 ทีม</title>
-<style>
-  :root {
-    --bg: #05060a;
-    --card-bg: #1a1d24;
-    --text: #f4f4f5;
-    --muted: #9ca3af;
-    --yes: #22c55e;
-    --no: #ef4444;
-  }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body {
-    margin: 0;
-    height: 100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, "Segoe UI", Roboto, "Noto Sans Thai", sans-serif;
-  }
-
-  /* ---------- หน้าแรก ---------- */
-  #home {
-    min-height: 100vh; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 24px;
-    padding: 24px; text-align: center;
-  }
-  #home h1 { font-size: 24px; margin: 0; }
-  #home p { color: var(--muted); margin: 0; max-width: 340px; }
-  .home-links { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
-  .home-links a {
-    display: block; padding: 20px 32px; background: var(--card-bg);
-    border-radius: 16px; color: var(--text); text-decoration: none;
-    font-weight: 700; font-size: 18px; border: 1px solid #2a2d35;
-  }
-  .home-links a:active { filter: brightness(1.2); }
-
-  /* ---------- โหมด Control ---------- */
-  #controlView { display: none; min-height: 100vh; padding: 14px; flex-direction: column; gap: 14px; max-width: 760px; margin: 0 auto; }
-  .status { text-align: center; font-size: 13px; color: var(--muted); min-height: 18px; }
-  .status.error { color: #f87171; }
-
-  .tab-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--card-bg); padding: 6px; border-radius: 14px; position: sticky; top: 0; z-index: 20; }
-  .tab-btn { background: transparent; color: var(--muted); padding: 12px 0; font-size: 14px; border-radius: 10px; }
-  .tab-btn.active { background: #3b82f6; color: #fff; }
-
-  .tab-panel { display: none; flex-direction: column; gap: 14px; }
-  .tab-panel.active { display: flex; }
-
-  .teams-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-  @media (min-width: 620px) { .teams-grid { grid-template-columns: 1fr 1fr; align-items: start; } }
-
-  .mode-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--card-bg); padding: 6px; border-radius: 14px; }
-  .mode-btn { background: transparent; color: var(--muted); padding: 12px 0; font-size: 14px; border-radius: 10px; }
-  .mode-btn.active { background: #22c55e; color: #05060a; }
-
-  .score-block { display: flex; flex-direction: column; align-items: center; gap: 10px; background: #0d0f13; border-radius: 14px; padding: 16px 10px; border: 1px solid #26292f; }
-  .score-count-input {
-    width: 100%; text-align: center; font-size: 64px; font-weight: 900; font-variant-numeric: tabular-nums;
-    line-height: 1; background: transparent; border: none; color: var(--text); font-family: inherit;
-  }
-  .score-count-input:focus { outline: 2px solid rgba(255,255,255,0.25); background: #000; border-radius: 8px; }
-  .score-count-input::-webkit-outer-spin-button, .score-count-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .score-btns { display: flex; gap: 6px; width: 100%; }
-  .score-btns button { flex: 1; padding: 12px 0; font-size: 14px; color: #fff; }
-  .btn-plus-score { background: #22c55e !important; }
-
-  .team-card {
-    background: var(--card-bg); border-radius: 18px; padding: 14px;
-    display: flex; flex-direction: column; gap: 12px; border-top: 6px solid var(--c);
-  }
-  .team-card.a { --c: var(--team-a-color, #3b82f6); }
-  .team-card.b { --c: var(--team-b-color, #f59e0b); }
-  .name-row { display: flex; gap: 8px; align-items: center; }
-  .name-input {
-    flex: 1; background: #000; border: 1px solid #333; color: var(--text);
-    font-size: 15px; padding: 8px 10px; border-radius: 10px; min-width: 0; font-weight: 700;
-  }
-  input[type="color"] { width: 38px; height: 38px; border: none; border-radius: 10px; background: none; padding: 0; cursor: pointer; flex-shrink: 0; }
-
-  .vote-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .vote-block {
-    background: #0d0f13; border-radius: 14px; padding: 10px; display: flex;
-    flex-direction: column; align-items: center; gap: 6px; border: 1px solid #26292f;
-  }
-  .vote-block.yes { border-color: rgba(34,197,94,0.35); }
-  .vote-block.no { border-color: rgba(239,68,68,0.35); }
-  .vote-label { font-size: 12px; font-weight: 700; letter-spacing: 0.03em; }
-  .vote-block.yes .vote-label { color: var(--yes); }
-  .vote-block.no .vote-label { color: var(--no); }
-  .vote-count-input {
-    width: 100%; text-align: center; font-size: 38px; font-weight: 900; font-variant-numeric: tabular-nums;
-    line-height: 1; background: transparent; border: none; color: var(--text); font-family: inherit;
-    border-radius: 8px; padding: 2px 0;
-  }
-  .vote-count-input:focus { outline: 2px solid rgba(255,255,255,0.25); background: #000; }
-  .vote-count-input::-webkit-outer-spin-button, .vote-count-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .vote-btns { display: flex; gap: 5px; width: 100%; }
-  button { border: none; border-radius: 12px; font-weight: 700; cursor: pointer; touch-action: manipulation; font-family: inherit; }
-  .vote-btns button { flex: 1; padding: 10px 0; font-size: 13px; color: #fff; }
-  .vote-block.yes .btn-plus { background: var(--yes); }
-  .vote-block.no .btn-plus { background: var(--no); }
-  .btn-minus5, .btn-plus5 { background: #26292f !important; color: var(--text) !important; font-size: 12px !important; flex: 0 0 auto !important; padding: 10px 8px !important; }
-  .btn-minus { background: #26292f !important; color: var(--text) !important; }
-  button:active { filter: brightness(0.85); transform: scale(0.97); }
-
-  .team-summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--muted); }
-  .team-summary b { color: var(--text); }
-  .target-input {
-    width: 64px; background: #000; border: 1px solid #333; color: var(--text);
-    font-size: 13px; padding: 6px; border-radius: 8px; text-align: center;
-  }
-  .progress-track { height: 8px; border-radius: 999px; background: #0d0f13; overflow: hidden; border: 1px solid #26292f; }
-  .progress-fill { height: 100%; background: var(--c); transition: width 0.25s ease; }
-
-  .global-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-  .btn-reset { background: #26292f; color: #f87171; padding: 12px 18px; font-size: 13px; }
-  .btn-home { background: #26292f; color: var(--muted); padding: 12px 18px; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; }
-  .persistent-actions { display: flex; justify-content: center; padding-top: 4px; }
-
-  .grand-total { text-align: center; font-size: 13px; color: var(--muted); }
-  .grand-total b { color: var(--text); font-size: 15px; }
-
-  .section-title { font-size: 13px; font-weight: 700; color: var(--muted); margin: 0 2px; text-transform: uppercase; letter-spacing: 0.04em; }
-  .card { background: var(--card-bg); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
-  .timer-set-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .timer-set-row input {
-    width: 64px; background: #000; border: 1px solid #333; color: var(--text);
-    font-size: 15px; padding: 8px; border-radius: 10px; text-align: center;
-  }
-  .timer-preset-btn { background: #26292f; color: var(--text); padding: 8px 12px; font-size: 13px; }
-  .timer-display-mini { font-size: 38px; font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; }
-  .timer-controls { display: flex; gap: 8px; }
-  .timer-controls button { flex: 1; padding: 12px 0; font-size: 14px; }
-  .btn-start { background: #22c55e; color: #05060a; }
-  .btn-pause { background: #f59e0b; color: #05060a; }
-  .btn-reset-timer { background: #26292f; color: var(--text); }
-
-  .q-add-row { display: flex; flex-direction: column; gap: 8px; }
-  .q-add-row input {
-    background: #000; border: 1px solid #333; color: var(--text);
-    font-size: 15px; padding: 10px; border-radius: 10px;
-  }
-  .btn-add-q { background: #3b82f6; color: #fff; padding: 10px; font-size: 14px; }
-  .q-list { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
-  .q-item {
-    background: #0d0f13; border-radius: 12px; padding: 10px 12px;
-    display: flex; flex-direction: column; gap: 4px; border: 1px solid #26292f;
-  }
-  .q-item.active { border-color: #3b82f6; }
-  .q-item-text { font-size: 14px; }
-  .q-item-answer { font-size: 12px; color: var(--muted); }
-  .q-item-actions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
-  .q-item-actions button { font-size: 12px; padding: 8px 10px; background: #26292f; color: var(--text); }
-  .q-item-actions .btn-del { color: #f87171; }
-  .q-empty { color: var(--muted); font-size: 13px; text-align: center; padding: 12px 0; }
-
-  .active-q-panel {
-    background: #0d0f13; border: 1px solid #3b82f6; border-radius: 14px; padding: 14px;
-    display: flex; flex-direction: column; gap: 10px;
-  }
-  .active-q-panel .q-text { font-size: 16px; font-weight: 700; }
-  .active-q-panel .a-text { font-size: 14px; color: #4ade80; }
-  .choice-inputs { display: flex; flex-direction: column; gap: 6px; }
-  .choice-inputs .choice-row { display: flex; align-items: center; gap: 8px; }
-  .choice-inputs .choice-letter { width: 22px; font-weight: 700; color: var(--muted); font-size: 14px; flex-shrink: 0; }
-  .choice-inputs input[type="text"] { flex: 1; background: #000; border: 1px solid #333; color: var(--text); font-size: 14px; padding: 8px 10px; border-radius: 10px; }
-  .choice-inputs input[type="radio"] { width: 18px; height: 18px; flex-shrink: 0; }
-  .choice-inputs .btn-remove-choice { flex-shrink: 0; width: 30px; height: 30px; padding: 0; background: #26292f; color: #f87171; font-size: 16px; line-height: 1; border-radius: 8px; }
-  .active-choices { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
-  .active-choice-item { background: #16181e; border: 1px solid #26292f; border-radius: 10px; padding: 8px 10px; font-size: 13px; }
-  .active-choice-item.correct-reveal { border-color: #4ade80; color: #4ade80; }
-  .active-q-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-  .active-q-actions button { font-size: 13px; padding: 10px 14px; }
-  .btn-reveal { background: #f59e0b; color: #05060a; }
-  .btn-close-q { background: #26292f; color: var(--text); }
-
-  /* ---------- โหมด Display ---------- */
-  #displayView { display: none; height: 100vh; width: 100vw; overflow: hidden; position: relative; flex-direction: column; }
-  .board { display: flex; flex: 1 1 auto; min-height: 0; width: 100%; transition: flex-basis 0.25s ease; }
-  .team { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3vh; position: relative; padding: 2vh 2vw; min-height: 0; overflow: hidden; }
-  .team.a { background: linear-gradient(160deg, var(--ca) 0%, #05060a 140%); }
-  .team.b { background: linear-gradient(200deg, var(--cb) 0%, #05060a 140%); }
-  .team-name { font-size: 4.2vw; font-weight: 700; letter-spacing: 0.02em; text-align: center; padding: 0 3vw; word-break: break-word; transition: font-size 0.25s ease; }
-
-  .vote-display-row { display: flex; gap: 3vw; }
-  .vote-display-block { display: flex; flex-direction: column; align-items: center; gap: 0.6vh; }
-  .vote-display-label {
-    font-size: 1.6vw; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
-    padding: 0.4vh 1.4vw; border-radius: 999px;
-  }
-  .vote-display-block.yes .vote-display-label { color: #05060a; background: var(--yes); }
-  .vote-display-block.no .vote-display-label { color: #05060a; background: var(--no); }
-  .vote-display-num { font-size: 11vw; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; transition: transform 0.15s ease, font-size 0.25s ease; }
-  .vote-display-num.pulse { animation: pulse 0.35s ease; }
-  @keyframes pulse { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
-
-  /* โหมดย่อ ตอนมีคำถามโชว์อยู่ด้านล่าง เพื่อให้เห็นคะแนนโหวตครบ */
-  #displayView.question-active .team-name { font-size: 2.6vw; }
-  #displayView.question-active .vote-display-num { font-size: 6.5vw; }
-  #displayView.question-active .team { gap: 1.5vh; padding: 1vh 2vw; }
-
-  .split-bar { width: 60%; max-width: 420px; height: 1.6vh; border-radius: 999px; overflow: hidden; display: flex; background: #0d0f13; border: 1px solid rgba(255,255,255,0.15); flex-shrink: 0; }
-  .split-bar-yes { background: var(--yes); height: 100%; }
-  .split-bar-no { background: var(--no); height: 100%; }
-
-  .team-total-tag { font-size: 1.4vw; color: rgba(255,255,255,0.55); font-weight: 600; letter-spacing: 0.03em; }
-
-  .score-display-block { display: none; flex-direction: column; align-items: center; gap: 1vh; }
-  .score-display-label {
-    font-size: 1.8vw; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.55);
-  }
-  .score-display-num { font-size: 15vw; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; transition: transform 0.15s ease, font-size 0.25s ease; }
-  .score-display-num.pulse { animation: pulse 0.35s ease; }
-  #displayView.question-active .score-display-num { font-size: 8vw; }
-
-  /* สลับมุมมองตามโหมด: โหวต ใช่/ไม่ vs คะแนน */
-  #displayView.mode-score .vote-display-row,
-  #displayView.mode-score .split-bar,
-  #displayView.mode-score .team-total-tag,
-  #displayView.mode-score .grand-total-ribbon { display: none; }
-  #displayView.mode-score .score-display-block { display: flex; }
-  #displayView.mode-vote .score-display-block { display: none; }
-
-  .divider { width: 2px; background: rgba(255,255,255,0.15); }
-  .vs {
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    font-size: 1.6vw; color: rgba(255,255,255,0.4); font-weight: 700; z-index: 2;
-    background: #05060a; padding: 0.5vw 1.2vw; border-radius: 999px; border: 1px solid rgba(255,255,255,0.15);
-  }
-
-  .grand-total-ribbon {
-    position: absolute; top: 0; left: 0;
-    background: #05060a; border: 1px solid rgba(255,255,255,0.15); border-left: none; border-top: none;
-    border-radius: 0 0 18px 0; padding: 0.8vh 1.6vw; z-index: 5;
-    font-size: 1.3vw; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums;
-  }
-  .grand-total-ribbon b { color: var(--text); }
-
-  .display-controls {
-    position: fixed; top: 1.5vh; right: 1.5vh; z-index: 50;
-    display: flex; gap: 8px; opacity: 0.35; transition: opacity 0.2s ease;
-  }
-  .display-controls:hover, .display-controls:focus-within { opacity: 1; }
-  .disp-ctrl-btn {
-    width: 44px; height: 44px; border-radius: 50%; background: rgba(10,10,14,0.75);
-    border: 1px solid rgba(255,255,255,0.2); color: var(--text); font-size: 18px;
-    display: flex; align-items: center; justify-content: center; text-decoration: none;
-    cursor: pointer;
-  }
-  .disp-ctrl-btn:active { filter: brightness(1.3); }
-
-  .timer-ribbon {
-    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-    background: #05060a; border: 1px solid rgba(255,255,255,0.15); border-top: none;
-    border-radius: 0 0 20px 20px; padding: 1vh 3vw; z-index: 5;
-    font-size: 6vw; font-weight: 900; font-variant-numeric: tabular-nums;
-    display: none;
-  }
-  #displayView.question-active .timer-ribbon { font-size: 3.5vw; padding: 0.5vh 2vw; }
-  .timer-ribbon.show { display: block; }
-  .timer-ribbon.low { color: #f87171; }
-
-  /* คำถามแสดงเป็นแถบด้านล่าง ไม่บังคะแนนโหวตด้านบน */
-  .question-banner {
-    flex: 0 0 auto; width: 100%; max-height: 42vh; display: none;
-    flex-direction: column; align-items: center; justify-content: center; gap: 1.4vh;
-    background: #101218; border-top: 2px solid #3b82f6; padding: 1.6vh 4vw;
-    text-align: center; overflow-y: auto;
-  }
-  .question-banner.show { display: flex; }
-  .question-label { font-size: 1.4vw; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
-  .question-text { font-size: 2.6vw; font-weight: 800; line-height: 1.3; max-width: 90vw; }
-  .answer-text { font-size: 2vw; font-weight: 700; color: #4ade80; display: none; }
-  .answer-text.show { display: block; }
-  .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1vw; margin-top: 0.4vh; width: 100%; max-width: 900px; }
-  .choice-box {
-    background: #0d0f13; border: 2px solid #333; border-radius: 12px;
-    padding: 0.8vh 1.2vw; display: flex; align-items: center; gap: 1vw;
-    text-align: left; transition: all 0.3s ease;
-  }
-  .choice-box .choice-letter {
-    font-size: 1.3vw; font-weight: 900; color: var(--muted);
-    background: #1a1d24; border-radius: 8px; width: 2.2vw; height: 2.2vw; min-width: 24px; min-height: 24px;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  }
-  .choice-box .choice-text { font-size: 1.4vw; font-weight: 600; }
-  .choice-box.correct-reveal { border-color: #4ade80; background: rgba(74, 222, 128, 0.12); }
-  .choice-box.correct-reveal .choice-letter { background: #4ade80; color: #05060a; }
-  .choice-box.correct-reveal .choice-text { color: #4ade80; }
-
-  .connecting-overlay {
-    position: fixed; inset: 0; background: rgba(5,6,10,0.95); display: flex;
-    align-items: center; justify-content: center; font-size: 16px; color: var(--muted); z-index: 10;
-  }
-  .hidden { display: none !important; }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#070910">
+  <title>Vote Neon X1 / X2</title>
+  <style>
+    :root{--bg:#070910;--panel:#101522;--panel2:#171d2e;--ink:#f6f7fb;--muted:#9da6bb;--red:#ff294d;--blue:#2b81ff;--green:#34e29a;--yellow:#ffd166;--line:rgba(255,255,255,.12);--shadow:0 0 34px rgba(43,129,255,.16)}
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Thai",sans-serif}
+    body{overflow-x:hidden}
+    button,input,textarea,select{font:inherit}
+    button{cursor:pointer;border:0;color:var(--ink);background:var(--panel2);border-radius:12px;padding:.75rem 1rem;transition:transform .15s,filter .15s,background .15s}
+    button:hover{filter:brightness(1.18)} button:active{transform:translateY(1px) scale(.98)}
+    input,textarea,select{width:100%;background:#0a0e18;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:.7rem .8rem;outline:none}
+    input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(43,129,255,.15)}
+    textarea{min-height:100px;resize:vertical}
+    label{display:grid;gap:.35rem;color:var(--muted);font-size:.9rem}
+    .app-shell{min-height:100vh;padding:clamp(14px,3vw,34px)}
+    .hidden{display:none!important}
+    .neon-title{letter-spacing:.04em;text-transform:uppercase;text-shadow:0 0 16px rgba(255,41,77,.55),0 0 32px rgba(43,129,255,.3)}
+    .brand-mark{color:var(--red);font-weight:900}
+    .landing{min-height:100vh;display:grid;place-items:center;position:relative;overflow:hidden}
+    .landing:before,.landing:after{content:"";position:absolute;border-radius:999px;filter:blur(20px);opacity:.48;pointer-events:none}
+    .landing:before{width:38vw;height:38vw;background:rgba(255,41,77,.16);left:-12vw;top:-12vw}.landing:after{width:42vw;height:42vw;background:rgba(43,129,255,.16);right:-16vw;bottom:-16vw}
+    .landing-card{width:min(760px,100%);padding:clamp(28px,6vw,72px);border:1px solid var(--line);border-radius:30px;background:linear-gradient(135deg,rgba(23,29,46,.9),rgba(10,14,24,.92));box-shadow:0 0 70px rgba(43,129,255,.15);position:relative;z-index:1;text-align:center}
+    .landing-card h1{font-size:clamp(2.4rem,7vw,5.8rem);margin:0 0 .7rem;font-weight:950;line-height:.95}.landing-card p{color:var(--muted);font-size:clamp(1rem,2vw,1.2rem)}
+    .landing-actions{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin:30px 0 10px}.big-btn{min-width:210px;padding:1rem 1.3rem;font-weight:800;font-size:1.05rem}.btn-red{background:linear-gradient(135deg,#ff294d,#b70d35);box-shadow:0 0 24px rgba(255,41,77,.28)}.btn-blue{background:linear-gradient(135deg,#2b81ff,#164cb7);box-shadow:0 0 24px rgba(43,129,255,.28)}.btn-green{background:linear-gradient(135deg,#34e29a,#158c67);color:#06100d;box-shadow:0 0 24px rgba(52,226,154,.2)}.btn-ghost{border:1px solid var(--line);background:rgba(255,255,255,.05)}.status{font-size:.86rem;color:var(--muted);margin-top:18px}.status.ok{color:var(--green)}.status.error{color:#ff7387}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 auto 18px;max-width:1500px}.topbar h1{font-size:clamp(1.15rem,3vw,2rem);margin:0}.topbar-actions{display:flex;gap:8px;align-items:center}.connection{font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:7px}.dot{width:8px;height:8px;border-radius:50%;background:var(--yellow);display:inline-block}.dot.ok{background:var(--green);box-shadow:0 0 12px var(--green)}.dot.error{background:var(--red)}
+    .control-layout{max-width:1500px;margin:auto;display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,.8fr);gap:18px}.panel{background:linear-gradient(145deg,rgba(23,29,46,.93),rgba(12,16,27,.95));border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:clamp(16px,2.4vw,26px)}
+    .tabs{display:flex;gap:8px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:18px}.tab{background:transparent;color:var(--muted);border-radius:9px;padding:.62rem 1rem}.tab.active{background:rgba(43,129,255,.2);color:var(--ink);box-shadow:inset 0 -2px var(--blue)}
+    .section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.section-head h2,.section-head h3{margin:0}.subtle{color:var(--muted);font-size:.87rem}.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.stack{display:grid;gap:14px}.divider{height:1px;background:var(--line);margin:22px 0}.team-config{border:1px solid var(--line);border-radius:16px;padding:14px;background:rgba(255,255,255,.025)}.team-config.a{box-shadow:inset 4px 0 var(--red)}.team-config.b{box-shadow:inset 4px 0 var(--blue)}.team-config h3{margin:0 0 12px}.color-row{display:grid;grid-template-columns:1fr 58px;gap:8px;align-items:end}.color-row input[type=color]{height:42px;padding:3px}
+    .mode-switch{display:flex;gap:8px;flex-wrap:wrap}.mode-switch button{border:1px solid var(--line);background:rgba(255,255,255,.04)}.mode-switch button.active{background:var(--green);color:#06100d;font-weight:800}.vote-board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.control-team{border-radius:16px;padding:16px;background:#0b101c;border:1px solid var(--line)}.control-team h3{margin:0;color:var(--team-color);text-shadow:0 0 12px color-mix(in srgb,var(--team-color),transparent 55%)}.metric-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.metric-row small{display:block;color:var(--muted);font-size:.76rem}.metric-row strong{font-size:1.35rem}.quick-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.quick-actions button{flex:1;min-width:76px}.quick-actions .plus{background:rgba(52,226,154,.16);color:var(--green)}.quick-actions .minus{background:rgba(255,41,77,.16);color:#ff8192}.quick-actions .five{background:rgba(43,129,255,.2);color:#76afff}.manual-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}.manual-grid label{font-size:.75rem}.target-card{display:grid;grid-template-columns:1fr 100px;gap:10px;align-items:end;margin-top:16px}.target-card label{font-size:.85rem}
+    .timer-card{position:sticky;top:18px}.timer-readout{font-size:clamp(3rem,8vw,6rem);font-weight:950;line-height:1;text-align:center;color:var(--green);text-shadow:0 0 22px rgba(52,226,154,.4);letter-spacing:.04em;margin:15px 0}.timer-readout.warning{color:var(--red);animation:blink 1s infinite}@keyframes blink{50%{opacity:.42}}.timer-controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.presets{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0}.presets button{padding:.55rem .7rem;font-size:.82rem}.timer-state{color:var(--muted);text-align:center;font-size:.85rem;margin-top:12px}.timer-state.running{color:var(--green)}
+    .question-form{display:grid;gap:12px}.options-grid label{color:var(--ink)}.option-label{display:grid;grid-template-columns:32px 1fr;align-items:center;gap:8px}.option-label span{color:var(--yellow);font-weight:900;font-size:1.2rem}.question-actions{display:flex;gap:8px;flex-wrap:wrap}.question-list{display:grid;gap:8px;margin-top:18px;max-height:380px;overflow:auto}.question-item{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:10px;background:rgba(255,255,255,.03)}.question-item.current{border-color:var(--green);box-shadow:0 0 14px rgba(52,226,154,.13)}.question-item button{padding:.45rem .6rem}.question-item .q-title{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}.q-tools{display:flex;gap:5px;flex-wrap:wrap}.danger{color:#ff8292!important;background:rgba(255,41,77,.12)!important}.show-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.show-tools button.active{background:var(--green);color:#06100d}.side-preview{position:sticky;top:18px}.mini-x1{display:grid;gap:10px}.mini-score{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mini-score div{border-left:3px solid var(--team-color);padding:8px;background:#0b101c;border-radius:8px}.mini-score strong{display:block;font-size:1.35rem}.tip-list{padding-left:1.2rem;color:var(--muted);line-height:1.8}.tip-list b{color:var(--ink)}
+    /* X1: หน้าตัวนับคะแนนปกติ — สไตล์ split-screen น้ำเงิน/ส้ม ตามภาพตัวอย่าง */
+    #X1{min-height:100vh;background:#03050a;position:relative;overflow:hidden;display:flex;flex-direction:column}
+    .x1-topbar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:clamp(14px,3vw,26px);z-index:6;pointer-events:none}
+    .x1-topbar>*{pointer-events:auto}
+    .x1-badge{background:rgba(6,10,20,.55);backdrop-filter:blur(6px);color:#fff;font-size:clamp(.8rem,1.6vw,1.05rem);padding:.55rem 1.05rem;border-radius:999px;font-weight:600;white-space:nowrap}
+    .x1-badge b{font-weight:900}
+    .x1-icons{display:flex;gap:10px}
+    .x1-icon-btn{width:clamp(36px,4.4vw,50px);height:clamp(36px,4.4vw,50px);border-radius:50%;background:rgba(0,0,0,.28);display:grid;place-items:center;color:#fff;border:0;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+    .x1-icon-btn svg{width:52%;height:52%;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .x1-timerbox{position:absolute;top:clamp(8px,2vw,18px);left:50%;transform:translateX(-50%);background:#05070c;border-radius:16px;padding:clamp(8px,1.6vw,14px) clamp(24px,6vw,58px);z-index:7;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+    .x1-timerbox span{display:block;font-size:clamp(2rem,5.6vw,4rem);font-weight:950;color:#fff;letter-spacing:.02em;font-variant-numeric:tabular-nums;line-height:1}
+    .x1-timerbox span.warning{color:var(--red);animation:blink 1s infinite}
+    .x1-arena{position:relative;flex:1;min-height:0}
+    .x1-side{position:absolute;top:0;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(10px,1.6vw,16px);padding:clamp(70px,12vw,110px) clamp(18px,5vw,54px) clamp(18px,4vw,40px);color:#fff;text-align:center}
+    .x1-side-a{left:0;width:56%;background:linear-gradient(160deg,#4d89ee 0%,#173f95 100%);clip-path:polygon(0 0,100% 0,88% 100%,0 100%);z-index:1}
+    .x1-side-b{left:44%;width:56%;background:linear-gradient(160deg,#eeae42 0%,#a3670f 100%);clip-path:polygon(14% 0,100% 0,100% 100%,0 100%);z-index:2}
+    .x1-side h2{font-size:clamp(1.5rem,3.6vw,3rem);font-weight:900;margin:0}
+    .x1-pills{display:flex;gap:10px}
+    .x1-pill{padding:.3rem 1.1rem;border-radius:999px;font-weight:800;font-size:clamp(.8rem,1.5vw,1rem)}
+    .x1-pill-yes{background:#2fbf60;color:#fff}
+    .x1-pill-no{background:#e6394d;color:#fff}
+    .x1-numbers{display:flex;gap:clamp(18px,5vw,56px);align-items:baseline}
+    .x1-numbers.x1-numbers-single{justify-content:center}
+    .x1-numbers span{font-size:clamp(3.2rem,9vw,7.5rem);font-weight:950;line-height:1;letter-spacing:.01em}
+    .x1-bar{width:100%;max-width:420px;height:9px;border-radius:999px;overflow:hidden;display:flex;background:rgba(255,255,255,.18)}
+    .x1-bar-yes{background:#2fbf60;height:100%}
+    .x1-bar-no{background:#e6394d;height:100%}
+    .x1-total{font-size:clamp(.9rem,1.7vw,1.15rem);color:rgba(255,255,255,.85)}
+    .x1-total b{font-weight:900}
+    .x1-vs{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#05070c;color:#fff;font-weight:900;font-size:clamp(.75rem,1.5vw,1.05rem);padding:.5rem .9rem;border-radius:999px;z-index:5;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+    .x1-float,.x2-float{position:fixed;right:18px;bottom:18px;display:flex;gap:8px;z-index:20;opacity:.82}.float-btn{padding:.6rem .72rem;background:rgba(20,26,40,.72);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(12px);font-size:.82rem}
+    @media(max-width:700px){.x1-side{position:relative;left:auto!important;width:100%!important;height:50%;clip-path:none!important;padding:clamp(50px,10vw,70px) 18px 18px}.x1-arena{display:flex;flex-direction:column}.x1-vs{top:50%;left:50%}.x1-topbar{padding:10px}}
+    /* X2: layout โจทย์เต็มจอ — timer ซ้ายบน, คะแนนขวาบน, โจทย์กลาง */
+    #X2{min-height:100vh;background:radial-gradient(circle at 40% 60%,rgba(43,129,255,.13),transparent 36%),#05070d;display:grid;grid-template-columns:minmax(180px,.55fr) minmax(0,2fr) minmax(260px,.9fr);grid-template-rows:auto 1fr;padding:clamp(18px,4vw,56px);gap:clamp(12px,3vw,36px);position:relative;overflow:hidden}.x2-timer{grid-column:1;grid-row:1;align-self:start}.x2-timer-label{color:var(--muted);font-size:.88rem;letter-spacing:.12em}.x2-timer-value{font-size:clamp(3.4rem,7vw,8rem);font-weight:950;line-height:.95;color:var(--green);text-shadow:0 0 25px rgba(52,226,154,.35);white-space:nowrap}.x2-timer-value.warning{color:var(--red);animation:blink .8s infinite}.x2-scores{grid-column:3;grid-row:1;display:grid;gap:10px;align-self:start}.x2-score{border-left:5px solid var(--team-color);padding:8px 12px;background:rgba(255,255,255,.055);border-radius:9px;box-shadow:0 0 20px color-mix(in srgb,var(--team-color),transparent 85%)}.x2-score-name{display:block;color:var(--team-color);font-weight:800;font-size:clamp(.9rem,1.5vw,1.2rem);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.x2-score-points{font-size:clamp(1.8rem,4vw,4rem);font-weight:950;line-height:1}.x2-score-meta{color:var(--muted);font-size:.78rem}.x2-question{grid-column:2;grid-row:1 / span 2;align-self:center;justify-self:stretch;text-align:center;max-width:1000px;margin:auto;padding:clamp(14px,3vw,38px);border:1px solid rgba(255,255,255,.1);border-radius:24px;background:rgba(10,14,24,.68);box-shadow:0 0 55px rgba(43,129,255,.12)}.x2-question-kicker{color:var(--green);font-size:clamp(1rem,2vw,1.4rem);font-weight:900;letter-spacing:.18em;margin-bottom:14px}.x2-question-text{font-size:clamp(1.8rem,4.4vw,5rem);font-weight:900;line-height:1.18;word-break:break-word}.x2-image{display:block;max-width:min(100%,640px);max-height:32vh;margin:20px auto 0;border-radius:14px;object-fit:contain;border:1px solid var(--line)}.x2-options{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;text-align:left;margin-top:22px}.x2-option{font-size:clamp(1rem,2vw,1.45rem);padding:12px 15px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.045)}.x2-option.correct{border-color:var(--green);background:rgba(52,226,154,.17);box-shadow:0 0 18px rgba(52,226,154,.16)}.option-letter{color:var(--yellow);font-weight:950;margin-right:8px}.x2-answer{margin-top:18px;color:var(--green);font-weight:800;font-size:clamp(1rem,2vw,1.5rem)}.x2-empty{grid-column:1 / -1;grid-row:1 / -1;display:grid;place-items:center;color:var(--muted);font-size:clamp(1.3rem,3vw,2.4rem);text-align:center}.display-shell{min-height:100vh}
+    @media(max-width:900px){.control-layout{grid-template-columns:1fr}.timer-card,.side-preview{position:static}.control-layout>.panel{min-width:0}.x2-question{grid-column:1 / -1;grid-row:2}.x2-timer{grid-column:1;grid-row:1}.x2-scores{grid-column:3;grid-row:1}}
+    @media(max-width:620px){.grid-2,.grid-3,.grid-4,.vote-board{grid-template-columns:1fr}.landing-actions{display:grid}.big-btn{width:100%}.topbar{align-items:flex-start;flex-direction:column}.timer-controls{grid-template-columns:1fr}.manual-grid{grid-template-columns:1fr}.x2-question{margin-top:20px}.x2-scores{grid-column:2 / 4}.x2-timer-value{font-size:clamp(2.5rem,11vw,4.5rem)}.x2-options{grid-template-columns:1fr}.x2-float{right:10px;bottom:10px;gap:4px}.float-btn{padding:.5rem;font-size:.72rem}}
+  </style>
 </head>
 <body>
+  <main id="landing" class="app-shell landing">
+    <section class="landing-card">
+      <div class="brand-mark">NEON SCOREBOARD</div>
+      <h1 class="neon-title">โหวต 2 ทีม<br><span style="color:var(--blue)">X1</span> / <span style="color:var(--green)">X2</span></h1>
+      <p>ระบบนับโหวต คะแนน คำถาม และเวลาสำหรับหลายจอแบบเรียลไทม์</p>
+      <div class="landing-actions">
+        <a class="big-btn btn-red" href="?mode=control">เปิดโหมดควบคุม</a>
+        <a class="big-btn btn-blue" href="?mode=display">เปิดจอแสดงผล</a>
+      </div>
+      <div id="landingStatus" class="status">กำลังเตรียมการเชื่อมต่อ…</div>
+    </section>
+  </main>
 
-<div id="home">
-  <h1>🗳️ โหวต ใช่ / ไม่ — 2 ทีม</h1>
-  <p>เลือกโหมดที่ต้องการเปิดในอุปกรณ์นี้</p>
-  <div class="home-links">
-    <a href="?mode=display">📺 จอโชว์ผล</a>
-    <a href="?mode=control">🎮 จอควบคุม</a>
-  </div>
-</div>
-
-<div id="controlView">
-  <div class="status" id="statusText"></div>
-
-  <div class="tab-bar">
-    <button class="tab-btn active" id="tabVoteBtn" data-tab="voteSection">🗳️ โหวต</button>
-    <button class="tab-btn" id="tabQuizBtn" data-tab="quizSection">❓ คำถาม/เวลา</button>
-  </div>
-
-  <div class="tab-panel active" id="voteSection">
-    <div class="mode-toggle" id="modeToggle">
-      <button class="mode-btn active" data-mode="vote">🗳️ นับโหวต ใช่/ไม่</button>
-      <button class="mode-btn" data-mode="score">🏆 คะแนน</button>
-    </div>
-
-    <div class="teams-grid">
-      <div class="team-card a" id="cardA">
-        <div class="name-row">
-          <input type="color" id="colorA" value="#3b82f6" />
-          <input type="text" id="nameA" class="name-input" value="ทีม A" maxlength="20" />
-        </div>
-
-        <div class="mode-vote-block" id="voteBlockA">
-          <div class="vote-row">
-            <div class="vote-block yes">
-              <div class="vote-label">✅ ใช่</div>
-              <input type="number" class="vote-count-input" id="yesA" data-team="A" data-side="yes" value="0" inputmode="numeric" />
-              <div class="vote-btns">
-                <button class="btn-minus" data-team="A" data-side="yes" data-delta="-1">−1</button>
-                <button class="btn-plus" data-team="A" data-side="yes" data-delta="1">+1</button>
-                <button class="btn-plus5" data-team="A" data-side="yes" data-delta="5">+5</button>
-              </div>
-            </div>
-            <div class="vote-block no">
-              <div class="vote-label">❌ ไม่</div>
-              <input type="number" class="vote-count-input" id="noA" data-team="A" data-side="no" value="0" inputmode="numeric" />
-              <div class="vote-btns">
-                <button class="btn-minus" data-team="A" data-side="no" data-delta="-1">−1</button>
-                <button class="btn-plus" data-team="A" data-side="no" data-delta="1">+1</button>
-                <button class="btn-plus5" data-team="A" data-side="no" data-delta="5">+5</button>
-              </div>
-            </div>
+  <main id="controlApp" class="app-shell hidden">
+    <header class="topbar">
+      <h1 class="neon-title"><span class="brand-mark">NEON</span> CONTROL</h1>
+      <div class="topbar-actions"><div id="controlConnection" class="connection"><span class="dot"></span>กำลังเชื่อมต่อ…</div><a class="btn-ghost" href="?mode=display">เปิดจอ</a><a class="btn-ghost" href="?">หน้าแรก</a></div>
+    </header>
+    <div class="control-layout">
+      <section class="panel">
+        <nav class="tabs" aria-label="เมนูควบคุม"><button class="tab active" data-tab="votes">โหวต</button><button class="tab" data-tab="questions">คำถาม/เวลา</button></nav>
+        <div id="votesPanel" class="tab-panel">
+          <div class="section-head"><div><h2>กระดานคะแนน</h2><div class="subtle">การเปลี่ยนแปลงจะบันทึกไปยัง Firestore อัตโนมัติ</div></div><div class="mode-switch"><button data-mode="votes" class="active">นับโหวต ใช่/ไม่</button><button data-mode="score">โหมดคะแนน</button></div></div>
+          <div class="vote-board">
+            <article class="control-team a" style="--team-color:var(--red)"><h3 id="teamAHeading">ทีม A</h3><div class="metric-row"><div><small>คะแนน</small><strong id="aScoreView">0</strong></div><div><small>โหวตรวม</small><strong id="aTotalView">0000</strong></div></div><div class="metric-row"><div><small>ใช่</small><strong id="aYesView">0</strong></div><div><small>ไม่</small><strong id="aNoView">0</strong></div></div><div class="quick-actions mode-votes"><button class="plus" data-team="A" data-kind="yes" data-delta="1">ใช่ +1</button><button class="minus" data-team="A" data-kind="yes" data-delta="-1">ใช่ −1</button><button class="five" data-team="A" data-kind="yes" data-delta="5">ใช่ +5</button></div><div class="quick-actions mode-votes"><button class="plus" data-team="A" data-kind="no" data-delta="1">ไม่ +1</button><button class="minus" data-team="A" data-kind="no" data-delta="-1">ไม่ −1</button><button class="five" data-team="A" data-kind="no" data-delta="5">ไม่ +5</button></div><div class="quick-actions mode-score hidden"><button class="plus" data-team="A" data-kind="score" data-delta="1">คะแนน +1</button><button class="minus" data-team="A" data-kind="score" data-delta="-1">คะแนน −1</button><button class="five" data-team="A" data-kind="score" data-delta="5">คะแนน +5</button></div></article>
+            <article class="control-team b" style="--team-color:var(--blue)"><h3 id="teamBHeading">ทีม B</h3><div class="metric-row"><div><small>คะแนน</small><strong id="bScoreView">0</strong></div><div><small>โหวตรวม</small><strong id="bTotalView">0000</strong></div></div><div class="metric-row"><div><small>ใช่</small><strong id="bYesView">0</strong></div><div><small>ไม่</small><strong id="bNoView">0</strong></div></div><div class="quick-actions mode-votes"><button class="plus" data-team="B" data-kind="yes" data-delta="1">ใช่ +1</button><button class="minus" data-team="B" data-kind="yes" data-delta="-1">ใช่ −1</button><button class="five" data-team="B" data-kind="yes" data-delta="5">ใช่ +5</button></div><div class="quick-actions mode-votes"><button class="plus" data-team="B" data-kind="no" data-delta="1">ไม่ +1</button><button class="minus" data-team="B" data-kind="no" data-delta="-1">ไม่ −1</button><button class="five" data-team="B" data-kind="no" data-delta="5">ไม่ +5</button></div><div class="quick-actions mode-score hidden"><button class="plus" data-team="B" data-kind="score" data-delta="1">คะแนน +1</button><button class="minus" data-team="B" data-kind="score" data-delta="-1">คะแนน −1</button><button class="five" data-team="B" data-kind="score" data-delta="5">คะแนน +5</button></div></article>
           </div>
-          <div class="team-summary">
-            <span>รวม: <b id="totalA">0</b> / <input type="number" id="targetA" class="target-input" min="0" value="350" /> คน</span>
-          </div>
-          <div class="progress-track"><div class="progress-fill" id="progressA" style="width:0%"></div></div>
-        </div>
-
-        <div class="mode-score-block hidden" id="scoreBlockA">
-          <div class="score-block">
-            <input type="number" class="score-count-input" id="scoreA" data-team="A" value="0" inputmode="numeric" />
-            <div class="score-btns">
-              <button class="btn-minus" data-scoreteam="A" data-delta="-1">−1</button>
-              <button class="btn-plus-score" data-scoreteam="A" data-delta="1">+1</button>
-              <button class="btn-plus5" data-scoreteam="A" data-delta="5">+5</button>
-            </div>
+          <div class="target-card"><label>เป้าหมายคะแนน / รอบ<input id="targetInput" type="number" min="0" step="1"></label><button id="resetBtn" class="danger">รีเซ็ตทั้งหมด</button></div>
+          <div class="divider"></div>
+          <div class="section-head"><h3>ตั้งค่าทีม</h3><span class="subtle">ชื่อ สี และค่าปัจจุบันแก้ได้ทันที</span></div>
+          <div class="grid-2">
+            <div class="team-config a"><h3>ทีม A</h3><label>ชื่อทีม<input id="aNameInput" type="text" maxlength="40"></label><div class="color-row"><label>สีทีม<input id="aColorInput" type="text" maxlength="20" placeholder="#ff294d"></label><input id="aColorPicker" type="color" aria-label="เลือกสีทีม A"></div><div class="manual-grid"><label>ใช่<input id="aYesInput" type="number" min="0"></label><label>ไม่<input id="aNoInput" type="number" min="0"></label><label>คะแนน<input id="aScoreInput" type="number" min="0"></label></div></div>
+            <div class="team-config b"><h3>ทีม B</h3><label>ชื่อทีม<input id="bNameInput" type="text" maxlength="40"></label><div class="color-row"><label>สีทีม<input id="bColorInput" type="text" maxlength="20" placeholder="#2b81ff"></label><input id="bColorPicker" type="color" aria-label="เลือกสีทีม B"></div><div class="manual-grid"><label>ใช่<input id="bYesInput" type="number" min="0"></label><label>ไม่<input id="bNoInput" type="number" min="0"></label><label>คะแนน<input id="bScoreInput" type="number" min="0"></label></div></div>
           </div>
         </div>
-      </div>
-
-      <div class="team-card b" id="cardB">
-        <div class="name-row">
-          <input type="color" id="colorB" value="#f59e0b" />
-          <input type="text" id="nameB" class="name-input" value="ทีม B" maxlength="20" />
+        <div id="questionsPanel" class="tab-panel hidden">
+          <div class="section-head"><div><h2>คำถามและเวลา</h2><div class="subtle">เลือกคำถามแล้วกด “โชว์คำถาม” เพื่อสลับจอเป็น X2</div></div><div id="qCount" class="subtle">0 คำถาม</div></div>
+          <form id="questionForm" class="question-form">
+            <label>คำถาม<textarea id="qText" required placeholder="พิมพ์โจทย์ที่ต้องการให้ผู้ชมเห็น"></textarea></label>
+            <div class="grid-2"><label>เฉลย / คำอธิบาย<textarea id="qAnswer" placeholder="เช่น ข้อ ข — เพราะว่า…"></textarea></label><label>URL รูปภาพโจทย์<input id="qImage" type="url" placeholder="https://…"></label></div>
+            <div class="options-grid grid-2"><label class="option-label"><span>ก</span><input id="qOpt0" type="text" maxlength="160" placeholder="ตัวเลือก ก"></label><label class="option-label"><span>ข</span><input id="qOpt1" type="text" maxlength="160" placeholder="ตัวเลือก ข"></label><label class="option-label"><span>ค</span><input id="qOpt2" type="text" maxlength="160" placeholder="ตัวเลือก ค"></label><label class="option-label"><span>ง</span><input id="qOpt3" type="text" maxlength="160" placeholder="ตัวเลือก ง"></label></div>
+            <label>ข้อที่ถูกต้อง<select id="qCorrect"><option value="0">ก</option><option value="1">ข</option><option value="2">ค</option><option value="3">ง</option></select></label>
+            <div class="question-actions"><button class="btn-green" type="submit">เพิ่มคำถาม</button><button id="clearQuestionForm" class="btn-ghost" type="button">ล้างฟอร์ม</button></div>
+          </form>
+          <div id="questionList" class="question-list"></div>
+          <div class="divider"></div>
+          <div class="section-head"><h3>คำถามที่เลือก</h3><span id="selectedQLabel" class="subtle">ยังไม่ได้เลือก</span></div>
+          <div class="show-tools"><button id="showQuestionBtn" class="btn-green">โชว์คำถาม</button><button id="showAnswerBtn" class="btn-ghost">โชว์เฉลย</button><button id="closeQuestionBtn" class="danger">ปิดคำถาม</button></div>
         </div>
-
-        <div class="mode-vote-block" id="voteBlockB">
-          <div class="vote-row">
-            <div class="vote-block yes">
-              <div class="vote-label">✅ ใช่</div>
-              <input type="number" class="vote-count-input" id="yesB" data-team="B" data-side="yes" value="0" inputmode="numeric" />
-              <div class="vote-btns">
-                <button class="btn-minus" data-team="B" data-side="yes" data-delta="-1">−1</button>
-                <button class="btn-plus" data-team="B" data-side="yes" data-delta="1">+1</button>
-                <button class="btn-plus5" data-team="B" data-side="yes" data-delta="5">+5</button>
-              </div>
-            </div>
-            <div class="vote-block no">
-              <div class="vote-label">❌ ไม่</div>
-              <input type="number" class="vote-count-input" id="noB" data-team="B" data-side="no" value="0" inputmode="numeric" />
-              <div class="vote-btns">
-                <button class="btn-minus" data-team="B" data-side="no" data-delta="-1">−1</button>
-                <button class="btn-plus" data-team="B" data-side="no" data-delta="1">+1</button>
-                <button class="btn-plus5" data-team="B" data-side="no" data-delta="5">+5</button>
-              </div>
-            </div>
-          </div>
-          <div class="team-summary">
-            <span>รวม: <b id="totalB">0</b> / <input type="number" id="targetB" class="target-input" min="0" value="350" /> คน</span>
-          </div>
-          <div class="progress-track"><div class="progress-fill" id="progressB" style="width:0%"></div></div>
-        </div>
-
-        <div class="mode-score-block hidden" id="scoreBlockB">
-          <div class="score-block">
-            <input type="number" class="score-count-input" id="scoreB" data-team="B" value="0" inputmode="numeric" />
-            <div class="score-btns">
-              <button class="btn-minus" data-scoreteam="B" data-delta="-1">−1</button>
-              <button class="btn-plus-score" data-scoreteam="B" data-delta="1">+1</button>
-              <button class="btn-plus5" data-scoreteam="B" data-delta="5">+5</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      </section>
+      <aside class="stack">
+        <section class="panel timer-card"><div class="section-head"><h2>ตัวจับเวลา</h2><span class="subtle">ซิงก์ทุกจอ</span></div><div id="controlTimerReadout" class="timer-readout">01:00</div><div class="grid-2"><label>นาที<input id="timerMinutes" type="number" min="0" max="999" value="1"></label><label>วินาที<input id="timerSeconds" type="number" min="0" max="59" value="0"></label></div><div class="presets"><button data-seconds="30">30 วิ</button><button data-seconds="60">1 นาที</button><button data-seconds="180">3 นาที</button><button data-seconds="300">5 นาที</button></div><div class="timer-controls"><button id="startTimerBtn" class="btn-green">เริ่ม</button><button id="pauseTimerBtn" class="btn-ghost">พัก</button><button id="resetTimerBtn" class="danger">รีเซ็ต</button></div><div id="timerState" class="timer-state">พร้อมเริ่ม</div></section>
+        <section class="panel side-preview"><div class="section-head"><h3>ตัวอย่างจอ</h3><span class="subtle">X1 / X2</span></div><div class="mini-x1"><div class="mini-score" id="miniScore"></div><div class="subtle">เมื่อโชว์คำถาม จอจะเปลี่ยนเป็น X2 อัตโนมัติ</div></div><ul class="tip-list"><li><b>X1</b> ตัวนับคะแนนปกติ</li><li><b>X2</b> โจทย์เต็มจอพร้อมเวลา</li><li>เปิดจอแสดงผลในอีกแท็บหรืออุปกรณ์หนึ่งได้</li></ul></section>
+      </aside>
     </div>
+  </main>
 
-    <div class="grand-total" id="voteGrandTotalLine">รวมทั้งหมดที่นับแล้ว: <b id="grandTotal">0</b> / <span id="grandTarget">700</span> คน</div>
-
-    <div class="global-actions">
-      <button class="btn-reset" id="resetBtn">รีเซ็ตยอดโหวต</button>
-      <button class="btn-reset hidden" id="resetScoreBtn">รีเซ็ตคะแนน</button>
-    </div>
-  </div>
-
-  <div class="tab-panel" id="quizSection">
-    <div class="section-title">⏱ ตั้งเวลา</div>
-    <div class="card">
-      <div class="timer-set-row">
-        <span style="font-size:13px;color:var(--muted)">ตั้ง:</span>
-        <input type="number" id="timerMin" min="0" max="180" value="1" /> นาที
-        <input type="number" id="timerSec" min="0" max="59" value="0" /> วินาที
-        <button class="timer-preset-btn" id="applyTimerSet">ใช้ค่านี้</button>
-      </div>
-      <div class="timer-set-row">
-        <button class="timer-preset-btn" data-preset="30">30 วิ</button>
-        <button class="timer-preset-btn" data-preset="60">1 นาที</button>
-        <button class="timer-preset-btn" data-preset="180">3 นาที</button>
-        <button class="timer-preset-btn" data-preset="300">5 นาที</button>
-      </div>
-      <div class="timer-display-mini" id="timerMiniDisplay">01:00</div>
-      <div class="timer-controls">
-        <button class="btn-start" id="timerStart">▶ เริ่ม</button>
-        <button class="btn-pause" id="timerPause">⏸ พัก</button>
-        <button class="btn-reset-timer" id="timerReset">↺ รีเซ็ต</button>
-      </div>
-    </div>
-
-    <div class="section-title">❓ โจทย์คำถาม</div>
-    <div class="card">
-      <div id="activeQPanel" class="active-q-panel hidden">
-        <div class="q-text" id="activeQText"></div>
-        <div class="active-choices" id="activeChoices"></div>
-        <div class="a-text hidden" id="activeAText"></div>
-        <div class="active-q-actions">
-          <button class="btn-reveal" id="revealBtn">เฉลย</button>
-          <button class="btn-close-q" id="closeQBtn">ปิดคำถามนี้</button>
+  <main id="displayApp" class="display-shell hidden">
+    <!-- X1 คือหน้าตัวนับคะแนนปกติ และจะแสดงเมื่อไม่มีคำถามที่เปิดอยู่ -->
+    <section id="X1" class="X1">
+      <div class="x1-topbar">
+        <div class="x1-badge">นับแล้ว <b id="x1CountedNum">0</b> / <span id="x1CountedTarget">700</span> คน</div>
+        <div class="x1-icons">
+          <button class="x1-icon-btn" id="toggleModeX1" title="สลับโหมด" aria-label="สลับโหมด"><svg viewBox="0 0 24 24"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/><path d="M12 3v9m0 9v-9m0 0L4 7.5M12 12l8-4.5"/></svg></button>
+          <button class="x1-icon-btn" id="fullscreenX1" title="เต็มจอ" aria-label="เต็มจอ"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3m11-5v3a2 2 0 0 1-2 2h-3"/></svg></button>
+          <a class="x1-icon-btn" href="?" id="x1HomeLink" title="หน้าแรก" aria-label="หน้าแรก"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg></a>
         </div>
       </div>
-
-      <div class="q-add-row">
-        <input type="text" id="newQ" placeholder="พิมพ์คำถาม..." maxlength="200" />
-        <div class="choice-inputs" id="choiceRows"></div>
-        <div style="display:flex; gap:8px;">
-          <button class="timer-preset-btn" id="addChoiceBtn" type="button">+ เพิ่มตัวเลือก</button>
-          <span style="font-size:12px;color:var(--muted); align-self:center;">ติ๊กวงกลมหน้าข้อที่ถูก • ลบทุกช่องได้ถ้าไม่ใช้แบบเลือกตอบ</span>
-        </div>
-        <input type="text" id="newA" placeholder="พิมพ์เฉลย / คำอธิบายเพิ่มเติม..." maxlength="200" />
-        <button class="btn-add-q" id="addQBtn">+ เพิ่มคำถาม</button>
+      <div class="x1-timerbox"><span id="x1TimerValue">01:00</span></div>
+      <div class="x1-arena">
+        <article id="x1TeamA" class="x1-side x1-side-a">
+          <h2 id="x1NameA">ทีม A</h2>
+          <div class="x1-pills"><span class="x1-pill x1-pill-yes" id="x1PillYesA">ใช่</span><span class="x1-pill x1-pill-no" id="x1PillNoA">ไม่</span></div>
+          <div class="x1-numbers"><span id="x1YesA">0</span><span id="x1NoA">0</span></div>
+          <div class="x1-bar"><div class="x1-bar-yes" id="x1BarYesA"></div><div class="x1-bar-no" id="x1BarNoA"></div></div>
+          <div class="x1-total" id="x1TotalLineA">รวม <b id="x1TotalA">0</b> / <span id="x1TargetA">350</span> คน</div>
+        </article>
+        <div class="x1-vs">VS</div>
+        <article id="x1TeamB" class="x1-side x1-side-b">
+          <h2 id="x1NameB">ทีม B</h2>
+          <div class="x1-pills"><span class="x1-pill x1-pill-yes" id="x1PillYesB">ใช่</span><span class="x1-pill x1-pill-no" id="x1PillNoB">ไม่</span></div>
+          <div class="x1-numbers"><span id="x1YesB">0</span><span id="x1NoB">0</span></div>
+          <div class="x1-bar"><div class="x1-bar-yes" id="x1BarYesB"></div><div class="x1-bar-no" id="x1BarNoB"></div></div>
+          <div class="x1-total" id="x1TotalLineB">รวม <b id="x1TotalB">0</b> / <span id="x1TargetB">350</span> คน</div>
+        </article>
       </div>
+    </section>
+    <!-- X2 คือ layout คำถามเต็มจอ: timer ซ้ายบน, คะแนนขวาบน, โจทย์อยู่ตรงกลาง -->
+    <section id="X2" class="X2 hidden">
+      <div class="x2-timer"><div class="x2-timer-label">เวลาที่เหลือ</div><div id="x2TimerValue" class="x2-timer-value">00:00</div></div><div id="x2Scores" class="x2-scores"></div><article id="x2Question" class="x2-question"></article>
+      <div class="x2-float"><button class="float-btn" id="fullscreenX2">⛶ เต็มจอ</button><button class="float-btn" id="toggleModeX2">↔ สลับโหมด</button><a class="float-btn" href="?">⌂ หน้าแรก</a></div>
+    </section>
+  </main>
 
-      <div class="q-list" id="qList">
-        <div class="q-empty">ยังไม่มีคำถาม เพิ่มด้านบนได้เลย</div>
-      </div>
-    </div>
-  </div>
+  <div id="toast" class="status" style="position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:99;background:rgba(16,21,34,.94);border:1px solid var(--line);padding:10px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s"></div>
 
-  <div class="persistent-actions">
-    <a class="btn-home" href="?">← กลับหน้าแรก</a>
-  </div>
-</div>
-
-<div id="displayView">
-  <div class="display-controls">
-    <button class="disp-ctrl-btn" id="modeToggleBtnDisplay" title="สลับโหมด">🗳️</button>
-    <button class="disp-ctrl-btn" id="fullscreenBtn" title="ขยายเต็มจอ">⛶</button>
-    <a class="disp-ctrl-btn" id="homeBtnDisplay" href="?" title="กลับหน้าแรก">🏠</a>
-  </div>
-  <div class="board" id="board" style="--ca:#3b82f6; --cb:#f59e0b;">
-    <div class="team a" id="teamA">
-      <div class="team-name" id="dispNameA">ทีม A</div>
-      <div class="vote-display-row">
-        <div class="vote-display-block yes">
-          <div class="vote-display-label">ใช่</div>
-          <div class="vote-display-num" id="dispYesA">0</div>
-        </div>
-        <div class="vote-display-block no">
-          <div class="vote-display-label">ไม่</div>
-          <div class="vote-display-num" id="dispNoA">0</div>
-        </div>
-      </div>
-      <div class="split-bar"><div class="split-bar-yes" id="splitYesA" style="width:50%"></div><div class="split-bar-no" id="splitNoA" style="width:50%"></div></div>
-      <div class="team-total-tag">รวม <span id="dispTotalA">0</span> / <span id="dispTargetA">350</span> คน</div>
-      <div class="score-display-block">
-        <div class="score-display-label">คะแนน</div>
-        <div class="score-display-num" id="dispScoreA">0</div>
-      </div>
-    </div>
-    <div class="divider"></div>
-    <div class="team b" id="teamB">
-      <div class="team-name" id="dispNameB">ทีม B</div>
-      <div class="vote-display-row">
-        <div class="vote-display-block yes">
-          <div class="vote-display-label">ใช่</div>
-          <div class="vote-display-num" id="dispYesB">0</div>
-        </div>
-        <div class="vote-display-block no">
-          <div class="vote-display-label">ไม่</div>
-          <div class="vote-display-num" id="dispNoB">0</div>
-        </div>
-      </div>
-      <div class="split-bar"><div class="split-bar-yes" id="splitYesB" style="width:50%"></div><div class="split-bar-no" id="splitNoB" style="width:50%"></div></div>
-      <div class="team-total-tag">รวม <span id="dispTotalB">0</span> / <span id="dispTargetB">350</span> คน</div>
-      <div class="score-display-block">
-        <div class="score-display-label">คะแนน</div>
-        <div class="score-display-num" id="dispScoreB">0</div>
-      </div>
-    </div>
-    <div class="vs">VS</div>
-  </div>
-  <div class="grand-total-ribbon">นับแล้ว <b id="dispGrandTotal">0</b> / <span id="dispGrandTarget">700</span> คน</div>
-
-  <div class="timer-ribbon" id="timerRibbon">01:00</div>
-
-  <div class="question-banner" id="questionBanner">
-    <div class="question-label">คำถาม</div>
-    <div class="question-text" id="dispQText"></div>
-    <div class="choices-grid hidden" id="dispChoicesGrid"></div>
-    <div class="answer-text" id="dispAText"></div>
-  </div>
-</div>
-
-<div id="connectingOverlay" class="connecting-overlay hidden">กำลังเชื่อมต่อ...</div>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-  import {
-    getFirestore, doc, getDoc, setDoc, updateDoc, increment, onSnapshot
-  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBJ0gDwu1MEvetUQuJnAEGdntjpRgsz6mo",
-    authDomain: "score-app-a1571.firebaseapp.com",
-    projectId: "score-app-a1571",
-    storageBucket: "score-app-a1571.firebasestorage.app",
-    messagingSenderId: "1024620222075",
-    appId: "1:1024620222075:web:f5abdb4e3f1d19931d34de",
-  };
-  // ใช้ document เดียวกันเป๊ะกับแอปสกอร์บอร์ดเดิม (scoreboard/current)
-  // เพราะ Firestore Rules อนุญาตเฉพาะ document นี้เท่านั้น
-  // ฟิลด์ทั้งหมดของแอปนี้ขึ้นต้นด้วย vote/yes/no/target เพื่อไม่ทับฟิลด์เดิมของสกอร์บอร์ด
-  const VOTE_DOC_PATH = { collection: "scoreboard", doc: "current" };
-  const DEFAULT_STATE = {
-    voteNameA: "ทีม A", voteNameB: "ทีม B",
-    voteColorA: "#3b82f6", voteColorB: "#f59e0b",
-    voteBoardMode: "vote",
-    yesA: 0, noA: 0, yesB: 0, noB: 0,
-    voteScoreA: 0, voteScoreB: 0,
-    targetA: 350, targetB: 350,
-    voteTimerDuration: 60,
-    voteTimerRemaining: 60,
-    voteTimerRunning: false,
-    voteTimerEndAt: null,
-    voteQuestions: [],
-    voteCurrentQIndex: -1,
-    voteQuestionVisible: false,
-    voteShowAnswer: false,
-  };
-
-  const params = new URLSearchParams(window.location.search);
-  const mode = params.get("mode");
-
-  const homeEl = document.getElementById("home");
-  const controlEl = document.getElementById("controlView");
-  const displayEl = document.getElementById("displayView");
-  const overlay = document.getElementById("connectingOverlay");
-
-  if (mode === "control") {
-    homeEl.classList.add("hidden");
-    controlEl.style.display = "flex";
-    overlay.classList.remove("hidden");
-    runControlMode();
-  } else if (mode === "display") {
-    homeEl.classList.add("hidden");
-    displayEl.style.display = "flex";
-    overlay.classList.remove("hidden");
-    runDisplayMode();
-  }
-
-  function initFirebase() {
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    return doc(db, VOTE_DOC_PATH.collection, VOTE_DOC_PATH.doc);
-  }
-
-  function fmtTime(totalSeconds) {
-    const s = Math.max(0, Math.round(totalSeconds));
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
-  }
-
-  function escapeHtml(str) {
-    const div = document.createElement("div");
-    div.textContent = str;
-    return div.innerHTML;
-  }
-
-  let audioCtx = null;
-  function ensureAudio() {
-    if (!audioCtx) {
-      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
-    }
-    if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
-  }
-  function beep(freq = 880, duration = 0.1, type = "sine", delay = 0, volume = 0.22) {
-    if (!audioCtx) return;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = type;
-    osc.frequency.value = freq;
-    gain.gain.setValueAtTime(volume, audioCtx.currentTime + delay);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(audioCtx.currentTime + delay);
-    osc.stop(audioCtx.currentTime + delay + duration);
-  }
-  function playTickSound(positive) {
-    ensureAudio();
-    if (positive) { beep(700, 0.07, "sine", 0, 0.25); beep(1000, 0.1, "sine", 0.06, 0.25); }
-    else { beep(300, 0.1, "sine", 0, 0.2); }
-  }
-  function playBuzzerSound() { ensureAudio(); beep(180, 0.5, "sawtooth", 0, 0.3); beep(160, 0.5, "sawtooth", 0.05, 0.25); }
-  function playRevealSound() { ensureAudio(); beep(500, 0.1, "triangle", 0, 0.2); beep(750, 0.15, "triangle", 0.1, 0.2); }
-
-  async function runControlMode() {
-    const voteRef = initFirebase();
-    const statusText = document.getElementById("statusText");
-
-    const els = {
-      colorA: document.getElementById("colorA"), colorB: document.getElementById("colorB"),
-      nameA: document.getElementById("nameA"), nameB: document.getElementById("nameB"),
-      yesA: document.getElementById("yesA"), noA: document.getElementById("noA"),
-      yesB: document.getElementById("yesB"), noB: document.getElementById("noB"),
-      scoreA: document.getElementById("scoreA"), scoreB: document.getElementById("scoreB"),
-      totalA: document.getElementById("totalA"), totalB: document.getElementById("totalB"),
-      targetA: document.getElementById("targetA"), targetB: document.getElementById("targetB"),
-      progressA: document.getElementById("progressA"), progressB: document.getElementById("progressB"),
-      grandTotal: document.getElementById("grandTotal"), grandTarget: document.getElementById("grandTarget"),
-      voteGrandTotalLine: document.getElementById("voteGrandTotalLine"),
-      voteBlockA: document.getElementById("voteBlockA"), voteBlockB: document.getElementById("voteBlockB"),
-      scoreBlockA: document.getElementById("scoreBlockA"), scoreBlockB: document.getElementById("scoreBlockB"),
-      resetBtn: document.getElementById("resetBtn"), resetScoreBtn: document.getElementById("resetScoreBtn"),
-      timerMin: document.getElementById("timerMin"), timerSec: document.getElementById("timerSec"),
-      timerMiniDisplay: document.getElementById("timerMiniDisplay"),
-      qList: document.getElementById("qList"),
-      activeQPanel: document.getElementById("activeQPanel"),
-      activeQText: document.getElementById("activeQText"),
-      activeAText: document.getElementById("activeAText"),
-    };
-
-    // ---- Tabs ----
-    document.querySelectorAll(".tab-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
-        document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
-        btn.classList.add("active");
-        document.getElementById(btn.dataset.tab).classList.add("active");
-      });
-    });
-
-    // ---- โหมด: นับโหวต / คะแนน ----
-    document.querySelectorAll(".mode-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        updateDoc(voteRef, { voteBoardMode: btn.dataset.mode }).catch(console.error);
-      });
-    });
-    function applyBoardMode(boardMode) {
-      const isScore = boardMode === "score";
-      document.querySelectorAll(".mode-btn").forEach((b) => b.classList.toggle("active", b.dataset.mode === boardMode));
-      els.voteBlockA.classList.toggle("hidden", isScore);
-      els.voteBlockB.classList.toggle("hidden", isScore);
-      els.scoreBlockA.classList.toggle("hidden", !isScore);
-      els.scoreBlockB.classList.toggle("hidden", !isScore);
-      els.voteGrandTotalLine.classList.toggle("hidden", isScore);
-      els.resetBtn.classList.toggle("hidden", isScore);
-      els.resetScoreBtn.classList.toggle("hidden", !isScore);
-    }
-
-    let isTypingName = false;
-    let isTypingTarget = false;
-    let saveNameTimeout = null;
-    let saveTargetTimeout = null;
-    let latestData = null;
-    let tickInterval = null;
-    const editingCounts = new Set();
-
-    document.body.addEventListener("click", ensureAudio, { once: true });
-
+  <script type="module">
+    // โหลด Firebase แบบ dynamic เพื่อให้หน้าแอปยังเปิดได้ แม้ CDN/Firebase เชื่อมต่อไม่ได้
+    let initializeApp, getFirestore, doc, onSnapshot, setDoc;
+    let firebaseReady = false;
     try {
-      const snap = await getDoc(voteRef);
-      if (!snap.exists() || snap.data().yesA === undefined) {
-        await setDoc(voteRef, DEFAULT_STATE, { merge: true });
-      }
-    } catch (err) {
-      statusText.textContent = "เชื่อมต่อ Firebase ไม่สำเร็จ ตรวจสอบ config และ Rules";
-      statusText.classList.add("error");
-      console.error(err);
+      ({ initializeApp } = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js"));
+      ({ getFirestore, doc, onSnapshot, setDoc } = await import("https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js"));
+      firebaseReady = true;
+    } catch (error) {
+      console.error("Firebase modules โหลดไม่สำเร็จ", error);
     }
 
-    onSnapshot(voteRef, (snap) => {
-      if (!snap.exists()) return;
-      const data = snap.data();
-      latestData = data;
-
-      const yesA = data.yesA ?? 0, noA = data.noA ?? 0;
-      const yesB = data.yesB ?? 0, noB = data.noB ?? 0;
-      const targetA = data.targetA ?? 350, targetB = data.targetB ?? 350;
-      const scoreA = data.voteScoreA ?? 0, scoreB = data.voteScoreB ?? 0;
-
-      if (!editingCounts.has(els.yesA)) els.yesA.value = yesA;
-      if (!editingCounts.has(els.noA)) els.noA.value = noA;
-      if (!editingCounts.has(els.yesB)) els.yesB.value = yesB;
-      if (!editingCounts.has(els.noB)) els.noB.value = noB;
-      if (!editingCounts.has(els.scoreA)) els.scoreA.value = scoreA;
-      if (!editingCounts.has(els.scoreB)) els.scoreB.value = scoreB;
-
-      applyBoardMode(data.voteBoardMode || "vote");
-
-      els.totalA.textContent = yesA + noA;
-      els.totalB.textContent = yesB + noB;
-      els.grandTotal.textContent = yesA + noA + yesB + noB;
-      els.grandTarget.textContent = targetA + targetB;
-      els.progressA.style.width = Math.min(100, ((yesA + noA) / (targetA || 1)) * 100) + "%";
-      els.progressB.style.width = Math.min(100, ((yesB + noB) / (targetB || 1)) * 100) + "%";
-
-      document.documentElement.style.setProperty("--team-a-color", data.voteColorA || "#3b82f6");
-      document.documentElement.style.setProperty("--team-b-color", data.voteColorB || "#f59e0b");
-
-      if (!isTypingName) {
-        if (document.activeElement !== els.nameA) els.nameA.value = data.voteNameA ?? "ทีม A";
-        if (document.activeElement !== els.nameB) els.nameB.value = data.voteNameB ?? "ทีม B";
-        els.colorA.value = data.voteColorA || "#3b82f6";
-        els.colorB.value = data.voteColorB || "#f59e0b";
-      }
-      if (!isTypingTarget) {
-        if (document.activeElement !== els.targetA) els.targetA.value = targetA;
-        if (document.activeElement !== els.targetB) els.targetB.value = targetB;
-      }
-
-      renderTimer();
-      renderQuestions(data);
-
-      overlay.classList.add("hidden");
-      statusText.textContent = "";
-      statusText.classList.remove("error");
-    }, (err) => {
-      statusText.textContent = "การเชื่อมต่อขาดหาย กำลังลองใหม่...";
-      statusText.classList.add("error");
-      console.error(err);
-    });
-
-    function fieldFor(team, side) {
-      return (side === "yes" ? "yes" : "no") + team;
-    }
-
-    // +1 / -1 / +5 buttons (โหมดโหวต)
-    document.querySelectorAll("[data-team][data-side][data-delta]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const team = btn.dataset.team;
-        const side = btn.dataset.side;
-        const delta = parseInt(btn.dataset.delta, 10);
-        const field = fieldFor(team, side);
-        playTickSound(delta > 0);
-        updateDoc(voteRef, { [field]: increment(delta) }).catch((err) => {
-          statusText.textContent = "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง";
-          statusText.classList.add("error");
-          console.error(err);
-        });
-      });
-    });
-
-    // −1 / +1 / +5 buttons (โหมดคะแนน)
-    document.querySelectorAll("[data-scoreteam][data-delta]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const field = "voteScore" + btn.dataset.scoreteam;
-        const delta = parseInt(btn.dataset.delta, 10);
-        playTickSound(delta > 0);
-        updateDoc(voteRef, { [field]: increment(delta) }).catch(console.error);
-      });
-    });
-
-    // แก้ไขตัวเลขโหวตได้โดยตรง
-    [els.yesA, els.noA, els.yesB, els.noB].forEach((input) => {
-      input.addEventListener("focus", () => editingCounts.add(input));
-      function commit() {
-        editingCounts.delete(input);
-        const field = fieldFor(input.dataset.team, input.dataset.side);
-        let val = parseInt(input.value, 10);
-        if (isNaN(val) || val < 0) val = 0;
-        input.value = val;
-        updateDoc(voteRef, { [field]: val }).catch(console.error);
-      }
-      input.addEventListener("blur", commit);
-      input.addEventListener("keydown", (e) => { if (e.key === "Enter") { input.blur(); } });
-    });
-
-    // แก้ไขคะแนนได้โดยตรง
-    [els.scoreA, els.scoreB].forEach((input) => {
-      input.addEventListener("focus", () => editingCounts.add(input));
-      function commit() {
-        editingCounts.delete(input);
-        const field = "voteScore" + input.dataset.team;
-        let val = parseInt(input.value, 10);
-        if (isNaN(val)) val = 0;
-        input.value = val;
-        updateDoc(voteRef, { [field]: val }).catch(console.error);
-      }
-      input.addEventListener("blur", commit);
-      input.addEventListener("keydown", (e) => { if (e.key === "Enter") { input.blur(); } });
-    });
-
-    document.getElementById("resetBtn").addEventListener("click", () => {
-      if (confirm("ยืนยันรีเซ็ตยอดโหวตทั้งหมดของทั้งสองทีมเป็น 0 ?")) {
-        updateDoc(voteRef, { yesA: 0, noA: 0, yesB: 0, noB: 0 }).catch(console.error);
-      }
-    });
-
-    document.getElementById("resetScoreBtn").addEventListener("click", () => {
-      if (confirm("ยืนยันรีเซ็ตคะแนนทั้งสองทีมเป็น 0 ?")) {
-        updateDoc(voteRef, { voteScoreA: 0, voteScoreB: 0 }).catch(console.error);
-      }
-    });
-
-    function debounceSaveNames() {
-      clearTimeout(saveNameTimeout);
-      saveNameTimeout = setTimeout(() => {
-        updateDoc(voteRef, {
-          voteNameA: els.nameA.value || "ทีม A",
-          voteNameB: els.nameB.value || "ทีม B",
-        }).catch(console.error);
-      }, 400);
-    }
-    [els.nameA, els.nameB].forEach((input) => {
-      input.addEventListener("focus", () => { isTypingName = true; });
-      input.addEventListener("blur", () => { isTypingName = false; });
-      input.addEventListener("input", debounceSaveNames);
-    });
-    els.colorA.addEventListener("input", () => updateDoc(voteRef, { voteColorA: els.colorA.value }).catch(console.error));
-    els.colorB.addEventListener("input", () => updateDoc(voteRef, { voteColorB: els.colorB.value }).catch(console.error));
-
-    function debounceSaveTargets() {
-      clearTimeout(saveTargetTimeout);
-      saveTargetTimeout = setTimeout(() => {
-        const targetA = parseInt(els.targetA.value, 10) || 0;
-        const targetB = parseInt(els.targetB.value, 10) || 0;
-        updateDoc(voteRef, { targetA, targetB }).catch(console.error);
-      }, 400);
-    }
-    [els.targetA, els.targetB].forEach((input) => {
-      input.addEventListener("focus", () => { isTypingTarget = true; });
-      input.addEventListener("blur", () => { isTypingTarget = false; });
-      input.addEventListener("input", debounceSaveTargets);
-    });
-
-    // ---- Timer ----
-    function renderTimer() {
-      if (!latestData) return;
-      let remaining;
-      if (latestData.voteTimerRunning && latestData.voteTimerEndAt) {
-        remaining = (latestData.voteTimerEndAt - Date.now()) / 1000;
-      } else {
-        remaining = latestData.voteTimerRemaining ?? latestData.voteTimerDuration ?? 60;
-      }
-      els.timerMiniDisplay.textContent = fmtTime(remaining);
-    }
-    if (!tickInterval) tickInterval = setInterval(renderTimer, 250);
-
-    document.getElementById("applyTimerSet").addEventListener("click", () => {
-      const mins = parseInt(els.timerMin.value, 10) || 0;
-      const secs = parseInt(els.timerSec.value, 10) || 0;
-      const total = mins * 60 + secs;
-      updateDoc(voteRef, { voteTimerDuration: total, voteTimerRemaining: total, voteTimerRunning: false, voteTimerEndAt: null }).catch(console.error);
-    });
-
-    document.querySelectorAll(".timer-preset-btn[data-preset]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const total = parseInt(btn.dataset.preset, 10);
-        updateDoc(voteRef, { voteTimerDuration: total, voteTimerRemaining: total, voteTimerRunning: false, voteTimerEndAt: null }).catch(console.error);
-      });
-    });
-
-    document.getElementById("timerStart").addEventListener("click", () => {
-      ensureAudio();
-      if (!latestData) return;
-      const remaining = latestData.voteTimerRunning && latestData.voteTimerEndAt
-        ? (latestData.voteTimerEndAt - Date.now()) / 1000
-        : (latestData.voteTimerRemaining ?? latestData.voteTimerDuration ?? 60);
-      if (remaining <= 0) return;
-      const endAt = Date.now() + remaining * 1000;
-      updateDoc(voteRef, { voteTimerRunning: true, voteTimerEndAt: endAt }).catch(console.error);
-    });
-
-    document.getElementById("timerPause").addEventListener("click", () => {
-      if (!latestData) return;
-      const remaining = latestData.voteTimerRunning && latestData.voteTimerEndAt
-        ? Math.max(0, (latestData.voteTimerEndAt - Date.now()) / 1000)
-        : (latestData.voteTimerRemaining ?? latestData.voteTimerDuration ?? 60);
-      updateDoc(voteRef, { voteTimerRunning: false, voteTimerRemaining: remaining, voteTimerEndAt: null }).catch(console.error);
-    });
-
-    document.getElementById("timerReset").addEventListener("click", () => {
-      if (!latestData) return;
-      const total = latestData.voteTimerDuration ?? 60;
-      updateDoc(voteRef, { voteTimerRunning: false, voteTimerRemaining: total, voteTimerEndAt: null }).catch(console.error);
-    });
-
-    // ---- Questions ----
-    function renderQuestions(data) {
-      const questions = data.voteQuestions || [];
-      const idx = data.voteCurrentQIndex ?? -1;
-      const LETTERS = ["ก", "ข", "ค", "ง", "จ", "ฉ", "ช", "ซ"];
-
-      if (data.voteQuestionVisible && idx >= 0 && questions[idx]) {
-        const item = questions[idx];
-        els.activeQPanel.classList.remove("hidden");
-        els.activeQText.textContent = item.q;
-
-        const choicesEl = document.getElementById("activeChoices");
-        if (item.choices && item.choices.some((c) => c)) {
-          choicesEl.innerHTML = item.choices.map((c, i) => {
-            if (!c) return "";
-            const isCorrect = data.voteShowAnswer && i === item.correctIndex;
-            return `<div class="active-choice-item${isCorrect ? " correct-reveal" : ""}">${LETTERS[i]}. ${escapeHtml(c)}</div>`;
-          }).join("");
-        } else {
-          choicesEl.innerHTML = "";
-        }
-
-        if (data.voteShowAnswer) {
-          els.activeAText.textContent = "เฉลย: " + item.a;
-          els.activeAText.classList.remove("hidden");
-        } else {
-          els.activeAText.classList.add("hidden");
-        }
-      } else {
-        els.activeQPanel.classList.add("hidden");
-      }
-
-      if (questions.length === 0) {
-        els.qList.innerHTML = '<div class="q-empty">ยังไม่มีคำถาม เพิ่มด้านบนได้เลย</div>';
-        return;
-      }
-
-      els.qList.innerHTML = "";
-      questions.forEach((item, i) => {
-        const div = document.createElement("div");
-        div.className = "q-item" + (i === idx && data.voteQuestionVisible ? " active" : "");
-        const choicesLine = (item.choices && item.choices.some((c) => c))
-          ? item.choices.map((c, ci) => c ? `${LETTERS[ci]}${ci === item.correctIndex ? "✓" : ""}: ${escapeHtml(c)}` : "").filter(Boolean).join(" | ")
-          : "";
-        div.innerHTML = `
-          <div class="q-item-text">${i + 1}. ${escapeHtml(item.q)}</div>
-          ${choicesLine ? `<div class="q-item-answer">${choicesLine}</div>` : ""}
-          <div class="q-item-answer">เฉลย: ${escapeHtml(item.a)}</div>
-          <div class="q-item-actions">
-            <button data-act="show" data-idx="${i}">📺 โชว์ข้อนี้</button>
-            <button data-act="del" data-idx="${i}" class="btn-del">🗑 ลบ</button>
-          </div>
-        `;
-        els.qList.appendChild(div);
-      });
-
-      els.qList.querySelectorAll("button[data-act]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const i = parseInt(btn.dataset.idx, 10);
-          if (btn.dataset.act === "show") {
-            ensureAudio();
-            updateDoc(voteRef, { voteCurrentQIndex: i, voteQuestionVisible: true, voteShowAnswer: false }).catch(console.error);
-          } else if (btn.dataset.act === "del") {
-            if (confirm("ลบคำถามข้อนี้?")) {
-              const newQuestions = questions.slice();
-              newQuestions.splice(i, 1);
-              updateDoc(voteRef, { voteQuestions: newQuestions, voteQuestionVisible: false, voteCurrentQIndex: -1 }).catch(console.error);
-            }
-          }
-        });
-      });
-    }
-
-    // ---- Dynamic choice rows for new question ----
-    const QLETTERS = ["ก", "ข", "ค", "ง", "จ", "ฉ", "ช", "ซ"];
-    const MAX_CHOICES = 8;
-    let newQChoices = ["", "", "", ""];
-    let newQCorrectIndex = 0;
-    const choiceRowsEl = document.getElementById("choiceRows");
-
-    function renderChoiceRows() {
-      const focusedIdx = choiceRowsEl.querySelector("input[type=text]:focus")
-        ? Array.from(choiceRowsEl.querySelectorAll("input[type=text]")).findIndex((el) => el === document.activeElement)
-        : -1;
-      choiceRowsEl.innerHTML = newQChoices.map((val, i) => `
-        <div class="choice-row">
-          <input type="radio" name="correctChoice" value="${i}" ${i === newQCorrectIndex ? "checked" : ""} data-role="radio" data-idx="${i}" />
-          <span class="choice-letter">${QLETTERS[i] || i + 1}</span>
-          <input type="text" data-role="text" data-idx="${i}" placeholder="ตัวเลือก ${QLETTERS[i] || i + 1}" maxlength="100" value="${escapeHtml(val)}" />
-          <button type="button" class="btn-remove-choice" data-role="remove" data-idx="${i}">✕</button>
-        </div>
-      `).join("");
-      if (focusedIdx >= 0 && choiceRowsEl.querySelectorAll("input[type=text]")[focusedIdx]) {
-        const el = choiceRowsEl.querySelectorAll("input[type=text]")[focusedIdx];
-        el.focus();
-        el.setSelectionRange(el.value.length, el.value.length);
-      }
-    }
-
-    choiceRowsEl.addEventListener("input", (e) => {
-      if (e.target.dataset.role === "text") {
-        newQChoices[parseInt(e.target.dataset.idx, 10)] = e.target.value;
-      }
-    });
-    choiceRowsEl.addEventListener("change", (e) => {
-      if (e.target.dataset.role === "radio") {
-        newQCorrectIndex = parseInt(e.target.dataset.idx, 10);
-      }
-    });
-    choiceRowsEl.addEventListener("click", (e) => {
-      if (e.target.dataset.role === "remove") {
-        const idx = parseInt(e.target.dataset.idx, 10);
-        newQChoices.splice(idx, 1);
-        if (newQCorrectIndex >= newQChoices.length) newQCorrectIndex = Math.max(0, newQChoices.length - 1);
-        else if (newQCorrectIndex > idx) newQCorrectIndex -= 1;
-        renderChoiceRows();
-      }
-    });
-    document.getElementById("addChoiceBtn").addEventListener("click", () => {
-      if (newQChoices.length >= MAX_CHOICES) { alert("เพิ่มได้สูงสุด " + MAX_CHOICES + " ตัวเลือก"); return; }
-      newQChoices.push("");
-      renderChoiceRows();
-    });
-    renderChoiceRows();
-
-    document.getElementById("addQBtn").addEventListener("click", () => {
-      const qInput = document.getElementById("newQ");
-      const aInput = document.getElementById("newA");
-      const q = qInput.value.trim();
-      const a = aInput.value.trim();
-      const rawChoices = newQChoices.map((c) => c.trim());
-      const hasChoices = rawChoices.some((c) => c !== "");
-      if (!q) { alert("กรอกคำถามด้วย"); return; }
-      if (!hasChoices && !a) { alert("กรอกเฉลย หรือกรอกตัวเลือกอย่างน้อย 1 ช่อง"); return; }
-
-      const newItem = { q, a };
-      if (hasChoices) {
-        newItem.choices = rawChoices;
-        newItem.correctIndex = newQCorrectIndex;
-        if (!a) newItem.a = rawChoices[newQCorrectIndex] || "";
-      }
-
-      const existing = (latestData && latestData.voteQuestions) || [];
-      updateDoc(voteRef, { voteQuestions: [...existing, newItem] }).catch(console.error);
-      qInput.value = "";
-      aInput.value = "";
-      newQChoices = ["", "", "", ""];
-      newQCorrectIndex = 0;
-      renderChoiceRows();
-    });
-
-    document.getElementById("revealBtn").addEventListener("click", () => {
-      ensureAudio();
-      updateDoc(voteRef, { voteShowAnswer: true }).catch(console.error);
-    });
-
-    document.getElementById("closeQBtn").addEventListener("click", () => {
-      updateDoc(voteRef, { voteQuestionVisible: false }).catch(console.error);
-    });
-  }
-
-  function runDisplayMode() {
-    const voteRef = initFirebase();
-    const els = {
-      board: document.getElementById("board"),
-      nameA: document.getElementById("dispNameA"), nameB: document.getElementById("dispNameB"),
-      yesA: document.getElementById("dispYesA"), noA: document.getElementById("dispNoA"),
-      yesB: document.getElementById("dispYesB"), noB: document.getElementById("dispNoB"),
-      totalA: document.getElementById("dispTotalA"), totalB: document.getElementById("dispTotalB"),
-      targetA: document.getElementById("dispTargetA"), targetB: document.getElementById("dispTargetB"),
-      splitYesA: document.getElementById("splitYesA"), splitNoA: document.getElementById("splitNoA"),
-      splitYesB: document.getElementById("splitYesB"), splitNoB: document.getElementById("splitNoB"),
-      grandTotal: document.getElementById("dispGrandTotal"), grandTarget: document.getElementById("dispGrandTarget"),
-      scoreA: document.getElementById("dispScoreA"), scoreB: document.getElementById("dispScoreB"),
-      timerRibbon: document.getElementById("timerRibbon"),
-      questionBanner: document.getElementById("questionBanner"),
-      dispQText: document.getElementById("dispQText"),
-      dispAText: document.getElementById("dispAText"),
-      dispChoicesGrid: document.getElementById("dispChoicesGrid"),
+    const firebaseConfig = {
+      apiKey: "AIzaSyBJ0gDwu1MEvetUQuJnAEGdntjpRgsz6mo",
+      authDomain: "score-app-a1571.firebaseapp.com",
+      projectId: "score-app-a1571",
+      storageBucket: "score-app-a1571.firebasestorage.app",
+      messagingSenderId: "1024620222075",
+      appId: "1:1024620222075:web:f5abdb4e3f1d19931d34de"
     };
-    const LETTERS = ["ก", "ข", "ค", "ง", "จ", "ฉ", "ช", "ซ"];
 
-    let prevYesA = null, prevNoA = null, prevYesB = null, prevNoB = null;
-    let prevScoreA = null, prevScoreB = null;
-    let prevShowAnswer = false;
-    let latestData = null;
-    let buzzerPlayedForThisRun = false;
+    const DEFAULT_STATE = {
+      teamA: { name: "ทีม A", color: "#ff294d", yes: 0, no: 0, score: 0 },
+      teamB: { name: "ทีม B", color: "#2b81ff", yes: 0, no: 0, score: 0 },
+      voteMode: "votes", target: 10,
+      voteTimerEndAt: null, voteTimerRemaining: 60, voteTimerRunning: false,
+      voteQuestions: [], voteCurrentQIndex: -1, voteQuestionVisible: false, voteShowAnswer: false
+    };
 
-    function tryUnlockAudio() { ensureAudio(); document.removeEventListener("click", tryUnlockAudio); document.removeEventListener("touchstart", tryUnlockAudio); }
-    document.addEventListener("click", tryUnlockAudio);
-    document.addEventListener("touchstart", tryUnlockAudio);
+    const mode = new URLSearchParams(location.search).get("mode") || "home";
+    const $ = (id) => document.getElementById(id);
+    // สถานะ/ตัวระบุหน้าจอหลักตามโจทย์: X1 = ตัวนับปกติ, X2 = คำถามเต็มจอ
+    const X1 = { id: "X1", name: "หน้าตัวนับคะแนนปกติ" };
+    const X2 = { id: "X2", name: "หน้าคำถามเต็มจอ" };
+    let state = structuredClone(DEFAULT_STATE);
+    let saveTimer = null;
+    let timerFinishedSaved = false;
+    let lastBeepSecond = -1;
+    let audioContext = null;
+    let unsubscribe = null;
+    let toastTimer = null;
 
-    // ---- ปุ่มขยายเต็มจอ ----
-    const fullscreenBtn = document.getElementById("fullscreenBtn");
-    function updateFullscreenBtn() {
-      fullscreenBtn.textContent = document.fullscreenElement ? "⤢" : "⛶";
-      fullscreenBtn.title = document.fullscreenElement ? "ย่อจอ" : "ขยายเต็มจอ";
+    function clone(value){ return JSON.parse(JSON.stringify(value)); }
+    function number(value, fallback = 0){ const n = Number(value); return Number.isFinite(n) ? n : fallback; }
+    function cleanColor(value, fallback){ const v = String(value || "").trim(); return /^#[0-9a-f]{3,8}$/i.test(v) ? v : fallback; }
+    function normalizeQuestion(q){
+      const raw = q || {};
+      return { question: String(raw.question || ""), answer: String(raw.answer || ""), imageUrl: String(raw.imageUrl || ""), options: [0,1,2,3].map(i => String((raw.options || [])[i] || "")), correctIndex: Math.max(0, Math.min(3, Math.round(number(raw.correctIndex, 0)))) };
     }
-    fullscreenBtn.addEventListener("click", () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      } else if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    });
-    document.addEventListener("fullscreenchange", updateFullscreenBtn);
-    updateFullscreenBtn();
-
-    // ---- ปุ่มสลับโหมด (โหวต/คะแนน) จากหน้าจอแสดงเอง ----
-    const modeToggleBtnDisplay = document.getElementById("modeToggleBtnDisplay");
-    let currentBoardMode = "vote";
-    function updateModeToggleBtn() {
-      modeToggleBtnDisplay.textContent = currentBoardMode === "score" ? "🏆" : "🗳️";
-      modeToggleBtnDisplay.title = currentBoardMode === "score" ? "สลับเป็นโหมดโหวต" : "สลับเป็นโหมดคะแนน";
+    function normalize(raw){
+      const s = raw || {};
+      const a = s.teamA || {}, b = s.teamB || {};
+      return {
+        teamA: { name: String(a.name || "ทีม A"), color: cleanColor(a.color, "#ff294d"), yes: Math.max(0, Math.round(number(a.yes))), no: Math.max(0, Math.round(number(a.no))), score: Math.max(0, Math.round(number(a.score))) },
+        teamB: { name: String(b.name || "ทีม B"), color: cleanColor(b.color, "#2b81ff"), yes: Math.max(0, Math.round(number(b.yes))), no: Math.max(0, Math.round(number(b.no))), score: Math.max(0, Math.round(number(b.score))) },
+        voteMode: s.voteMode === "score" ? "score" : "votes", target: Math.max(0, Math.round(number(s.target, 10))),
+        voteTimerEndAt: s.voteTimerEndAt == null ? null : number(s.voteTimerEndAt, null), voteTimerRemaining: Math.max(0, number(s.voteTimerRemaining, 60)), voteTimerRunning: Boolean(s.voteTimerRunning),
+        voteQuestions: Array.isArray(s.voteQuestions) ? s.voteQuestions.map(normalizeQuestion) : [], voteCurrentQIndex: Math.round(number(s.voteCurrentQIndex, -1)), voteQuestionVisible: Boolean(s.voteQuestionVisible), voteShowAnswer: Boolean(s.voteShowAnswer)
+      };
     }
-    modeToggleBtnDisplay.addEventListener("click", () => {
-      const nextMode = currentBoardMode === "score" ? "vote" : "score";
-      updateDoc(voteRef, { voteBoardMode: nextMode }).catch(console.error);
-    });
-    updateModeToggleBtn();
-
-    function pulse(el) {
-      el.classList.remove("pulse");
-      void el.offsetWidth;
-      el.classList.add("pulse");
+    function escapeHtml(value){ const d = document.createElement("div"); d.textContent = String(value ?? ""); return d.innerHTML; }
+    function setText(id, value){ const el = $(id); if (el) el.textContent = String(value ?? ""); }
+    function showToast(message, error = false){ const el = $("toast"); el.textContent = message; el.style.color = error ? "#ff8292" : "var(--ink)"; el.style.opacity = "1"; clearTimeout(toastTimer); toastTimer = setTimeout(() => el.style.opacity = "0", 2600); }
+    function setConnection(ok, message){
+      ["controlConnection", "x1Sync"].forEach(id => { const el = $(id); if (el) { el.textContent = message; if (el.classList.contains("connection")) { const dot = el.querySelector(".dot"); if (dot) dot.className = "dot " + (ok ? "ok" : "error"); } } });
+      const l = $("landingStatus"); if(l){l.textContent = message; l.className = "status " + (ok ? "ok" : "error");}
     }
-
-    function setSplit(yesEl, noEl, yes, no) {
-      const total = yes + no;
-      const yesPct = total > 0 ? (yes / total) * 100 : 50;
-      const noPct = total > 0 ? (no / total) * 100 : 50;
-      yesEl.style.width = yesPct + "%";
-      noEl.style.width = noPct + "%";
+    function total(team){ return number(team.yes) + number(team.no); }
+    function pad4(value){ return String(Math.max(0, Math.round(number(value)))).padStart(4, "0"); }
+    function formatTime(ms){ const seconds = Math.max(0, Math.ceil(number(ms, 0) / 1000)); return String(Math.floor(seconds / 60)).padStart(2,"0") + ":" + String(seconds % 60).padStart(2,"0"); }
+    function remainingMs(){
+      if (!state.voteTimerRunning) return Math.max(0, number(state.voteTimerRemaining, 0) * 1000);
+      return Math.max(0, number(state.voteTimerEndAt, Date.now()) - Date.now());
     }
+    function currentQuestion(){ const i = number(state.voteCurrentQIndex, -1); return state.voteQuestions[i] || null; }
 
-    onSnapshot(voteRef, (snap) => {
-      if (!snap.exists()) return;
-      const data = snap.data();
-      latestData = data;
+    async function saveNow(){
+      try { if (!firebaseReady || !boardRef) throw new Error("Firebase ยังไม่พร้อม"); await setDoc(boardRef, clone(state)); setConnection(true, "เชื่อมต่อแล้ว • บันทึกแล้ว"); }
+      catch(error){ console.error(error); setConnection(false, "เชื่อมต่อไม่สำเร็จ — ใช้งานออฟไลน์ได้บางส่วน"); showToast("บันทึก Firestore ไม่สำเร็จ", true); }
+    }
+    function scheduleSave(){ clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 250); }
+    function updateState(mutator, immediate = false){ mutator(state); renderAll(); if(immediate) { clearTimeout(saveTimer); saveNow(); } else scheduleSave(); }
 
-      const yesA = data.yesA ?? 0, noA = data.noA ?? 0;
-      const yesB = data.yesB ?? 0, noB = data.noB ?? 0;
-      const targetA = data.targetA ?? 350, targetB = data.targetB ?? 350;
-      const scoreA = data.voteScoreA ?? 0, scoreB = data.voteScoreB ?? 0;
-      const boardMode = data.voteBoardMode || "vote";
-      currentBoardMode = boardMode;
-      updateModeToggleBtn();
+    function setValue(id, value){ const el = $(id); if (el && document.activeElement !== el) el.value = value; }
+    function renderControl(){
+      const a = state.teamA, b = state.teamB;
+      setText("teamAHeading", a.name); setText("teamBHeading", b.name); setText("aScoreView", a.score); setText("bScoreView", b.score); setText("aTotalView", pad4(total(a))); setText("bTotalView", pad4(total(b))); setText("aYesView", a.yes); setText("bYesView", b.yes); setText("aNoView", a.no); setText("bNoView", b.no); setValue("targetInput", state.target);
+      ["a","b"].forEach(k => { const team = k === "a" ? a : b; setValue(k+"NameInput", team.name); setValue(k+"ColorInput", team.color); setValue(k+"ColorPicker", team.color); setValue(k+"YesInput", team.yes); setValue(k+"NoInput", team.no); setValue(k+"ScoreInput", team.score); });
+      document.querySelectorAll("[data-mode]").forEach(btn => btn.classList.toggle("active", btn.dataset.mode === state.voteMode)); document.querySelectorAll(".mode-votes").forEach(el => el.classList.toggle("hidden", state.voteMode !== "votes")); document.querySelectorAll(".mode-score").forEach(el => el.classList.toggle("hidden", state.voteMode !== "score"));
+      renderTimer(); renderQuestionList(); renderMiniScore();
+    }
+    function renderTimer(){
+      const ms = remainingMs(); const text = formatTime(ms); const sec = Math.ceil(ms/1000); const readout = $("controlTimerReadout"); if(readout){readout.textContent = text; readout.classList.toggle("warning", sec <= 10 && sec > 0);}
+      const x1Timer = $("x1TimerValue"); if(x1Timer){x1Timer.textContent = text; x1Timer.classList.toggle("warning", sec <= 10 && sec > 0);}
+      setValue("timerMinutes", Math.floor(sec/60)); setValue("timerSeconds", sec%60); const running = state.voteTimerRunning && ms > 0; const status = $("timerState"); if(status){status.textContent = running ? "กำลังนับเวลา" : (ms <= 0 ? "หมดเวลา" : "พักอยู่ / พร้อมเริ่ม"); status.classList.toggle("running", running);}
+      if (state.voteTimerRunning && ms <= 0 && !timerFinishedSaved){ timerFinishedSaved = true; state.voteTimerRunning = false; state.voteTimerEndAt = null; state.voteTimerRemaining = 0; saveNow(); }
+      if (state.voteTimerRunning && ms > 0) timerFinishedSaved = false;
+    }
+    function renderQuestionList(){
+      const list = $("questionList"); if(!list) return; list.replaceChildren(); setText("qCount", `${state.voteQuestions.length} คำถาม`); const selected = currentQuestion(); setText("selectedQLabel", selected ? `ข้อที่ ${state.voteCurrentQIndex + 1}` : "ยังไม่ได้เลือก");
+      state.voteQuestions.forEach((q, i) => { const row = document.createElement("div"); row.className = "question-item" + (i === state.voteCurrentQIndex ? " current" : ""); const title = document.createElement("div"); title.className = "q-title"; title.textContent = `${i+1}. ${q.question || "(ไม่มีข้อความ)"}`; const tools = document.createElement("div"); tools.className = "q-tools"; const select = document.createElement("button"); select.textContent = "เลือก"; select.addEventListener("click", () => updateState(s => { s.voteCurrentQIndex = i; s.voteQuestionVisible = false; s.voteShowAnswer = false; })); const del = document.createElement("button"); del.textContent = "ลบ"; del.className = "danger"; del.addEventListener("click", () => { if(confirm("ลบคำถามนี้หรือไม่?")) updateState(s => { s.voteQuestions.splice(i,1); s.voteCurrentQIndex = Math.min(s.voteCurrentQIndex, s.voteQuestions.length - 1); s.voteQuestionVisible = false; s.voteShowAnswer = false; }, true); }); tools.append(select, del); row.append(title, tools); list.append(row); });
+      $("showQuestionBtn")?.classList.toggle("active", state.voteQuestionVisible); $("showAnswerBtn")?.classList.toggle("active", state.voteShowAnswer);
+    }
+    function renderMiniScore(){ const wrap = $("miniScore"); if(!wrap) return; wrap.replaceChildren(); [state.teamA,state.teamB].forEach(team => { const d=document.createElement("div"); d.style.setProperty("--team-color",team.color); d.innerHTML = `<strong></strong><span></span>`; d.querySelector("strong").textContent = team.score; d.querySelector("span").textContent = team.name; wrap.append(d); }); }
 
-      displayEl.classList.toggle("mode-score", boardMode === "score");
-      displayEl.classList.toggle("mode-vote", boardMode !== "score");
-
-      els.nameA.textContent = data.voteNameA || "ทีม A";
-      els.nameB.textContent = data.voteNameB || "ทีม B";
-      els.board.style.setProperty("--ca", data.voteColorA || "#3b82f6");
-      els.board.style.setProperty("--cb", data.voteColorB || "#f59e0b");
-
-      els.yesA.textContent = yesA;
-      els.noA.textContent = noA;
-      els.yesB.textContent = yesB;
-      els.noB.textContent = noB;
-      els.totalA.textContent = yesA + noA;
-      els.totalB.textContent = yesB + noB;
-      els.targetA.textContent = targetA;
-      els.targetB.textContent = targetB;
-      els.grandTotal.textContent = yesA + noA + yesB + noB;
-      els.grandTarget.textContent = targetA + targetB;
-      setSplit(els.splitYesA, els.splitNoA, yesA, noA);
-      setSplit(els.splitYesB, els.splitNoB, yesB, noB);
-      els.scoreA.textContent = scoreA;
-      els.scoreB.textContent = scoreB;
-
-      if (prevYesA !== null && yesA !== prevYesA) pulse(els.yesA);
-      if (prevNoA !== null && noA !== prevNoA) pulse(els.noA);
-      if (prevYesB !== null && yesB !== prevYesB) pulse(els.yesB);
-      if (prevNoB !== null && noB !== prevNoB) pulse(els.noB);
-      if (prevScoreA !== null && scoreA !== prevScoreA) pulse(els.scoreA);
-      if (prevScoreB !== null && scoreB !== prevScoreB) pulse(els.scoreB);
-      prevYesA = yesA; prevNoA = noA; prevYesB = yesB; prevNoB = noB;
-      prevScoreA = scoreA; prevScoreB = scoreB;
-
-      const questions = data.voteQuestions || [];
-      const idx = data.voteCurrentQIndex ?? -1;
-      if (data.voteQuestionVisible && idx >= 0 && questions[idx]) {
-        const item = questions[idx];
-        els.questionBanner.classList.add("show");
-        displayEl.classList.add("question-active");
-        els.dispQText.textContent = item.q;
-
-        if (item.choices && item.choices.some((c) => c)) {
-          els.dispChoicesGrid.classList.remove("hidden");
-          els.dispChoicesGrid.innerHTML = item.choices.map((c, i) => {
-            if (!c) return "";
-            const isCorrect = data.voteShowAnswer && i === item.correctIndex;
-            return `<div class="choice-box${isCorrect ? " correct-reveal" : ""}">
-              <div class="choice-letter">${LETTERS[i]}</div>
-              <div class="choice-text">${escapeHtml(c)}</div>
-            </div>`;
-          }).join("");
+    // X1 render: ตัวนับคะแนนปกติ ใช้ textContent กับข้อมูลทั้งหมดเพื่อป้องกัน XSS
+    function renderX1(){
+      const a=state.teamA,b=state.teamB; const target=Math.max(0,number(state.target,0)); const isScore = state.voteMode === "score";
+      [["A",a],["B",b]].forEach(([key,team])=>{
+        const t=total(team);
+        setText("x1Name"+key,team.name);
+        const pillYes=$("x1PillYes"+key), pillNo=$("x1PillNo"+key), noEl=$("x1No"+key), noNum=noEl?.parentElement;
+        const barYes=$("x1BarYes"+key), barNo=$("x1BarNo"+key), line=$("x1TotalLine"+key);
+        if(isScore){
+          if(pillYes) pillYes.textContent="คะแนน"; if(pillNo) pillNo.classList.add("hidden"); if(noNum) noNum.classList.add("x1-numbers-single"); if(noEl) noEl.classList.add("hidden");
+          setText("x1Yes"+key, team.score);
+          const scorePct = target>0 ? Math.min(100, number(team.score)/target*100) : 0;
+          if(barYes) barYes.style.width = scorePct+"%"; if(barNo) barNo.style.width = "0%";
+          if(line) line.textContent = `คะแนน ${team.score} / เป้าหมาย ${target}`;
         } else {
-          els.dispChoicesGrid.classList.add("hidden");
-          els.dispChoicesGrid.innerHTML = "";
+          if(pillYes) pillYes.textContent="ใช่"; if(pillNo) pillNo.classList.remove("hidden"); if(noNum) noNum.classList.remove("x1-numbers-single"); if(noEl) noEl.classList.remove("hidden");
+          setText("x1Yes"+key,team.yes); setText("x1No"+key,team.no);
+          const yesPct = t>0 ? (number(team.yes)/t*100) : 60;
+          if(barYes) barYes.style.width = yesPct+"%"; if(barNo) barNo.style.width = (100-yesPct)+"%";
+          if(line){ line.replaceChildren("รวม ", Object.assign(document.createElement("b"),{textContent:t})," / ", target," คน"); }
         }
+      });
+      setText("x1CountedNum", total(a)+total(b)); setText("x1CountedTarget", target*2);
+      $(X1.id)?.classList.toggle("hidden", Boolean(state.voteQuestionVisible && currentQuestion()));
+    }
+    // X2 render: โจทย์เต็มจอ responsive พร้อม timer ที่คำนวณจาก voteTimerEndAt - Date.now()
+    function renderX2(){
+      const q=currentQuestion(), active=Boolean(state.voteQuestionVisible && q); $(X2.id)?.classList.toggle("hidden", !active); if(!active) return;
+      const box=$("x2Question"); box.replaceChildren(); const kicker=document.createElement("div"); kicker.className="x2-question-kicker"; kicker.textContent="โจทย์"; const text=document.createElement("div"); text.className="x2-question-text"; text.textContent=q.question; box.append(kicker,text);
+      if(q.imageUrl){ try { const url=new URL(q.imageUrl, location.href); if(url.protocol === "http:" || url.protocol === "https:"){ const img=document.createElement("img"); img.className="x2-image"; img.alt="รูปภาพโจทย์"; img.src=url.href; img.onerror=()=>img.remove(); box.append(img); } } catch(e){} }
+      const opts=q.options.filter(v=>v.trim() !== ""); if(opts.length){ const grid=document.createElement("div"); grid.className="x2-options"; q.options.forEach((opt,i)=>{ if(!opt.trim()) return; const item=document.createElement("div"); item.className="x2-option" + (state.voteShowAnswer && i===q.correctIndex ? " correct" : ""); const letter=document.createElement("span"); letter.className="option-letter"; letter.textContent=["ก","ข","ค","ง"][i]; item.append(letter,document.createTextNode(opt)); grid.append(item); }); box.append(grid); }
+      if(state.voteShowAnswer){ const ans=document.createElement("div"); ans.className="x2-answer"; ans.textContent="เฉลย: " + (q.answer || ["ก","ข","ค","ง"][q.correctIndex] || "—"); box.append(ans); }
+      const scoreWrap=$("x2Scores"); scoreWrap.replaceChildren(); [state.teamA,state.teamB].forEach(team=>{ const card=document.createElement("div"); card.className="x2-score"; card.style.setProperty("--team-color",team.color); const n=document.createElement("span"); n.className="x2-score-name"; n.textContent=team.name; const s=document.createElement("div"); s.className="x2-score-points"; s.textContent=team.score; const m=document.createElement("div"); m.className="x2-score-meta"; m.textContent=`โหวตรวม ${pad4(total(team))} • ใช่ ${team.yes} / ไม่ ${team.no}`; card.append(n,s,m); scoreWrap.append(card); });
+      const timeEl=$("x2TimerValue"); const ms=remainingMs(); timeEl.textContent=formatTime(ms); const sec=Math.ceil(ms/1000); timeEl.classList.toggle("warning",sec<=10 && sec>0); if(sec<=10 && sec>0 && sec!==lastBeepSecond){lastBeepSecond=sec; beep();} if(sec<=0) lastBeepSecond=-1;
+    }
+    function renderAll(){ renderControl(); renderX1(); renderX2(); }
 
-        if (data.voteShowAnswer) {
-          if (!prevShowAnswer) playRevealSound();
-          els.dispAText.textContent = "เฉลย: " + item.a;
-          els.dispAText.classList.add("show");
-        } else {
-          els.dispAText.classList.remove("show");
-        }
-        prevShowAnswer = data.voteShowAnswer;
-      } else {
-        els.questionBanner.classList.remove("show");
-        displayEl.classList.remove("question-active");
-        els.dispChoicesGrid.classList.add("hidden");
-        prevShowAnswer = false;
-      }
+    function beep(){ try { audioContext ||= new (window.AudioContext || window.webkitAudioContext)(); const osc=audioContext.createOscillator(), gain=audioContext.createGain(); osc.frequency.value=660; gain.gain.setValueAtTime(.0001,audioContext.currentTime); gain.gain.exponentialRampToValueAtTime(.08,audioContext.currentTime+.01); gain.gain.exponentialRampToValueAtTime(.0001,audioContext.currentTime+.16); osc.connect(gain).connect(audioContext.destination); osc.start(); osc.stop(audioContext.currentTime+.18); } catch(e) { /* browser อาจปิดเสียง — ไม่ให้แอปพัง */ } }
+    function setTimerFromInputs(){ const min=Math.max(0,Math.min(999,Math.round(number($("timerMinutes")?.value,0)))); const sec=Math.max(0,Math.min(59,Math.round(number($("timerSeconds")?.value,0)))); updateState(s=>{s.voteTimerRunning=false;s.voteTimerEndAt=null;s.voteTimerRemaining=min*60+sec;},true); }
+    function toggleFullscreen(){ const target=$("displayApp"); if(document.fullscreenElement) document.exitFullscreen?.(); else target.requestFullscreen?.().catch(()=>{}); }
+    function toggleMode(){ location.href = mode === "display" ? "?mode=control" : "?mode=display"; }
 
-      buzzerPlayedForThisRun = false;
-      overlay.classList.add("hidden");
-    }, (err) => console.error(err));
+    document.querySelectorAll("[data-tab]").forEach(btn=>btn.addEventListener("click",()=>{document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b===btn)); $("votesPanel").classList.toggle("hidden",btn.dataset.tab!=="votes"); $("questionsPanel").classList.toggle("hidden",btn.dataset.tab!=="questions");}));
+    document.querySelectorAll("[data-mode]").forEach(btn=>btn.addEventListener("click",()=>updateState(s=>s.voteMode=btn.dataset.mode,true)));
+    document.querySelectorAll("[data-team][data-kind]").forEach(btn=>btn.addEventListener("click",()=>{ const team=btn.dataset.team === "A" ? "teamA" : "teamB"; const kind=btn.dataset.kind; const delta=number(btn.dataset.delta); updateState(s=>{s[team][kind]=Math.max(0,number(s[team][kind])+delta);}); }));
+    $("resetBtn").addEventListener("click",()=>{if(confirm("รีเซ็ตโหวตและคะแนนทั้งหมดหรือไม่?")) updateState(s=>{[s.teamA,s.teamB].forEach(t=>{t.yes=0;t.no=0;t.score=0;});},true)});
+    $("targetInput").addEventListener("change",e=>updateState(s=>s.target=Math.max(0,Math.round(number(e.target.value))),true));
+    [["a","teamA"],["b","teamB"]].forEach(([prefix,key])=>{
+      $(prefix+"NameInput").addEventListener("change",e=>updateState(s=>s[key].name=e.target.value.trim() || (prefix === "a" ? "ทีม A" : "ทีม B"),true));
+      $(prefix+"ColorInput").addEventListener("change",e=>updateState(s=>s[key].color=cleanColor(e.target.value,prefix === "a" ? "#ff294d" : "#2b81ff"),true));
+      $(prefix+"ColorPicker").addEventListener("input",e=>{ $(prefix+"ColorInput").value=e.target.value; updateState(s=>s[key].color=e.target.value); });
+      ["Yes","No","Score"].forEach(kind=>$(prefix+kind+"Input").addEventListener("change",e=>updateState(s=>s[key][kind.toLowerCase()]=Math.max(0,Math.round(number(e.target.value))),true)));
+    });
+    document.querySelectorAll("[data-seconds]").forEach(btn=>btn.addEventListener("click",()=>{const sec=number(btn.dataset.seconds);$("timerMinutes").value=Math.floor(sec/60);$("timerSeconds").value=sec%60;setTimerFromInputs();}));
+    $("startTimerBtn").addEventListener("click",()=>{ const ms=state.voteTimerRunning?remainingMs():Math.max(0,number(state.voteTimerRemaining,0)*1000) || Math.max(0,(number($("timerMinutes").value)*60+number($("timerSeconds").value))*1000); updateState(s=>{s.voteTimerRunning=ms>0;s.voteTimerEndAt=Date.now()+ms;s.voteTimerRemaining=ms/1000;},true); });
+    $("pauseTimerBtn").addEventListener("click",()=>{const ms=remainingMs();updateState(s=>{s.voteTimerRunning=false;s.voteTimerEndAt=null;s.voteTimerRemaining=ms/1000;},true)});
+    $("resetTimerBtn").addEventListener("click",setTimerFromInputs);
+    $("questionForm").addEventListener("submit",e=>{e.preventDefault();const q={question:$("qText").value.trim(),answer:$("qAnswer").value.trim(),imageUrl:$("qImage").value.trim(),options:[0,1,2,3].map(i=>$("qOpt"+i).value.trim()),correctIndex:Number($("qCorrect").value)};if(!q.question){showToast("กรุณาใส่คำถาม",true);return;}updateState(s=>{s.voteQuestions.push(q);s.voteCurrentQIndex=s.voteQuestions.length-1;s.voteQuestionVisible=false;s.voteShowAnswer=false;},true);$("questionForm").reset();showToast("เพิ่มคำถามแล้ว");});
+    $("clearQuestionForm").addEventListener("click",()=>$("questionForm").reset());
+    $("showQuestionBtn").addEventListener("click",()=>{if(!currentQuestion()){showToast("กรุณาเลือกหรือเพิ่มคำถามก่อน",true);return;}updateState(s=>{s.voteQuestionVisible=true;s.voteShowAnswer=false;},true)});
+    $("showAnswerBtn").addEventListener("click",()=>{if(!currentQuestion()){showToast("กรุณาเลือกคำถามก่อน",true);return;}updateState(s=>{s.voteQuestionVisible=true;s.voteShowAnswer=!s.voteShowAnswer;},true)});
+    $("closeQuestionBtn").addEventListener("click",()=>updateState(s=>{s.voteQuestionVisible=false;s.voteShowAnswer=false;},true));
+    ["fullscreenX1","fullscreenX2"].forEach(id=>$(id).addEventListener("click",toggleFullscreen)); ["toggleModeX1","toggleModeX2"].forEach(id=>$(id).addEventListener("click",toggleMode));
 
-    setInterval(() => {
-      if (!latestData) return;
-      let remaining;
-      if (latestData.voteTimerRunning && latestData.voteTimerEndAt) {
-        remaining = (latestData.voteTimerEndAt - Date.now()) / 1000;
-      } else {
-        remaining = latestData.voteTimerRemaining ?? latestData.voteTimerDuration ?? 0;
+    function showOnlyMode(){ $("landing").classList.toggle("hidden",mode!=="home"); $("controlApp").classList.toggle("hidden",mode!=="control"); $("displayApp").classList.toggle("hidden",mode!=="display"); }
+    showOnlyMode();
+    let boardRef = null;
+    if (firebaseReady) {
+      try {
+        const app = initializeApp(firebaseConfig); const db = getFirestore(app); boardRef = doc(db,"scoreboard","current");
+        unsubscribe = onSnapshot(boardRef, async snap=>{ if(!snap.exists()){ state=clone(DEFAULT_STATE); try{await setDoc(boardRef,state);}catch(e){setConnection(false,"เชื่อมต่อไม่สำเร็จ — ตรวจสอบ Firebase และสิทธิ์ Firestore");} } else { state=normalize(snap.data()); } renderAll(); setConnection(true,"เชื่อมต่อแล้ว • realtime"); }, error=>{ console.error(error); setConnection(false,"เชื่อมต่อไม่สำเร็จ — หน้าไม่พังและยังดูข้อมูลล่าสุดได้"); renderAll(); });
+      } catch (error) {
+        console.error("Firebase เริ่มต้นไม่สำเร็จ", error); setConnection(false,"เชื่อมต่อไม่สำเร็จ — ตรวจสอบ Firebase config");
       }
-      const showTimer = latestData.voteTimerRunning || (latestData.voteTimerRemaining && latestData.voteTimerRemaining > 0 && latestData.voteTimerRemaining !== latestData.voteTimerDuration);
-      if (showTimer) {
-        els.timerRibbon.classList.add("show");
-        els.timerRibbon.textContent = fmtTime(remaining);
-        els.timerRibbon.classList.toggle("low", remaining <= 10 && remaining > 0);
-      } else {
-        els.timerRibbon.classList.remove("show");
-      }
-      if (remaining <= 0 && latestData.voteTimerRunning && !buzzerPlayedForThisRun) {
-        buzzerPlayedForThisRun = true;
-        playBuzzerSound();
-      }
-    }, 250);
-  }
-</script>
+    } else {
+      setConnection(false,"เชื่อมต่อไม่สำเร็จ — เปิดหน้าได้ แต่ Firebase ยังไม่พร้อม");
+    }
+    setInterval(()=>{ renderTimer(); renderX2(); },250);
+    renderAll();
+  </script>
 </body>
 </html>
